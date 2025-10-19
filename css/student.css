@@ -1,0 +1,120 @@
+.student-form {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 30px 40px;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+  max-width: 1100px;
+  margin: 10px auto;
+  font-family: 'Roboto Condensed', sans-serif;
+  transition: box-shadow 0.3s ease;
+}
+
+/* ✨ Hover: deeper shadow + red glow effect */
+.student-form:hover {
+  box-shadow:
+    0 4px 16px rgba(0,0,0,0.15),
+    0 0 12px rgba(204, 1, 0, 0.15); /* subtle red glow */
+}
+
+.student-form h2 {
+  color: #cc0100;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #cc0100;
+  display: inline-block;
+  padding-bottom: 6px;
+}
+
+/* Top section */
+.form-top {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  align-items: center;
+  margin-bottom: 25px;
+}
+
+.form-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.form-group label {
+  font-weight: 600;
+}
+
+.form-group input[type="date"],
+.form-group select,
+.form-group input[type="number"] {
+  padding: 6px 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 1rem;
+}
+
+.form-group.check label {
+  font-weight: normal;
+}
+
+.form-group.small input[type="number"] {
+  width: 60px;
+}
+
+/* Behavior table */
+.behavior-table {
+  overflow-x: auto;
+}
+
+.behavior-table table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+.behavior-table th {
+  background: #cc0100;
+  color: white;
+  padding: 10px;
+  text-align: center;
+  font-weight: 600;
+  border: 1px solid #b00000;
+}
+
+.behavior-table td {
+  border: 1px solid #ddd;
+  padding: 6px;
+  text-align: center;
+  background: #fafafa;
+}
+
+.behavior-table td.behavior-label {
+  text-align: left;
+  font-weight: 600;
+  background: #fdfdfd;
+  padding-left: 12px;
+}
+
+.behavior-table tbody tr:nth-child(even) td {
+  background: #f5f5f5;
+}
+
+/* Checkbox styling */
+.behavior-table input[type="checkbox"] {
+  transform: scale(1.2);
+  cursor: pointer;
+  accent-color: #cc0100;
+}
+
+/* Comments */
+.form-comments {
+  margin-top: 25px;
+}
+
+.form-comments textarea {
+  width: 100%;
+  padding: 10px;
+  font-size: 1rem;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  resize: vertical;
+}

@@ -1,0 +1,286 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@700&display=swap');
+
+body {
+  margin: 0;
+  font-family: 'Roboto Condensed', Arial, sans-serif;
+  background: #f5f6f8;
+}
+
+/* ───────────── Top red line with arc ───────────── */
+.header-top {
+  background: #cc0100;
+  height: 8px;
+  position: relative;
+  z-index: 500;
+}
+
+.header-top::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 300px;
+  height: 60px;
+  background: #cc0100;
+  border-bottom-left-radius: 100px 100%;
+  z-index: 500;
+}
+
+/* ───────────── Profile (name + picture) inside red arc ───────────── */
+.profile {
+  position: absolute;
+  right: 30px;
+  top: 4px;
+  z-index: 522;
+  display: flex;
+  align-items: center;
+  gap: 30px;
+}
+
+/* Match nav bar typography for name */
+.userName {
+  color: white;
+  font-family: 'Roboto Condensed', Arial, sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  font-size: 1.1rem;
+  text-transform: uppercase;
+  margin-top: 2px; /* slight nudge for perfect vertical alignment */
+}
+
+/* Profile image styling */
+.profile-pic {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid white;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+  transition: transform 0.01s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+
+}
+
+/* Hover effect — subtle zoom and glow ring */
+.profile-pic:hover {
+  transform: scale(1.05);
+  border-color: #ffd6d6; /* light red/pink highlight */
+  box-shadow:
+    0 0 0 3px rgba(255,255,255,0.6),
+    0 0 10px rgba(204,1,0,0.4);
+  cursor: pointer;
+}
+
+
+/* ───────────── White section with logo and title ───────────── */
+.header-main {
+  background: #f5f6f8;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 0px 80px;
+  position: relative;
+  z-index: 20;
+  margin-top: 9px;
+  overflow: visible;
+  height: 80px;
+}
+
+/* White dip under logo */
+.header-main::after {
+  content: "";
+  position: absolute;
+  left: 74px;
+  bottom: -15px;
+  width: 100px;
+  height: 60px;
+  background: #f5f6f8;
+  border-bottom-left-radius: 60% 100%;
+  border-bottom-right-radius: 60% 100%;
+  z-index: 19;
+}
+
+/* Logo */
+.logo {
+  height: 90px;
+  width: 90px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: -12px;
+  margin-right: 25px;
+  position: relative;
+  z-index: 21;
+}
+
+/* School Name */
+.school-name h1 {
+  font-family: 'Roboto Condensed', Arial, sans-serif;
+  font-size: 2.2em;
+  font-weight: 700;
+  color: #cc0100;
+  margin: 0;
+  letter-spacing: 0.4px;
+}
+
+/* ───────────── Red nav bar (CHS Style) ───────────── */
+.nav-bar {
+  background: #cc0100;
+  position: relative;
+  z-index: 10;
+  padding: 0;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+/* Align items left under logo */
+.nav-bar ul {
+  list-style: none;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  margin: 0;
+  padding: 0 0 0 160px; /* pushes start just under right side of logo/dip */
+}
+
+.nav-bar li {
+  position: relative;
+  margin: 0 8px;
+}
+
+.nav-bar a {
+  display: inline-block;
+  color: white;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 1.1rem;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  padding: 8px 24px;
+  transition: all 0.25s ease;
+}
+
+/* Hover effect - lighter red background and underline */
+.nav-bar a:hover {
+  background: #e40000;
+  border-bottom: 3px solid white;
+}
+
+/* Active effect - persistent underline */
+.nav-bar a.active {
+  border-bottom: 3px solid white;
+}
+
+/* Optional dropdown arrow (for future use) */
+.nav-bar li.has-dropdown > a::after {
+  content: " ▼";
+  font-size: 0.7em;
+}
+
+/* ───────────── Dropdown menu styling ───────────── */
+.nav-bar li.has-dropdown {
+  position: relative;
+}
+
+/* Hide dropdown initially */
+.nav-bar .dropdown {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: #cc0100;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  min-width: 240px;
+  border-radius: 0 0 6px 6px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.25);
+  z-index: 99;
+}
+
+/* Show dropdown on hover */
+.nav-bar li.has-dropdown:hover .dropdown {
+  display: block;
+}
+
+/* Individual dropdown links */
+.nav-bar .dropdown li {
+  margin: 0;
+  width: 100%;
+}
+
+.nav-bar .dropdown a {
+  display: block;
+  color: white;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.95rem;
+  text-transform: none;
+  padding: 12px 18px;
+  transition: background 0.2s ease;
+}
+
+/* Hover effects */
+.nav-bar .dropdown a:hover {
+  background: #e40000;
+}
+
+/* Add subtle divider lines between items */
+.nav-bar .dropdown li:not(:last-child) a {
+  border-bottom: 1px solid rgba(255,255,255,0.15);
+}
+
+
+/* ───────────── Page content ───────────── */
+main {
+  background: #f5f6f8;
+  padding: 30px;
+  min-height: 70vh;
+}
+
+/* ───────────── Responsive adjustments ───────────── */
+@media (max-width: 800px) {
+  .header-top::after {
+    width: 36vw;
+  }
+
+  .profile {
+    right: 20px;
+    top: 8px;
+  }
+
+  .profile-pic {
+    width: 40px;
+    height: 40px;
+  }
+
+  .userName {
+    font-size: 0.9rem;
+  }
+
+  .logo {
+    height: 80px;
+    width: 80px;
+  }
+
+  .school-name h1 {
+    font-size: 1.4em;
+  }
+
+  .nav-bar ul {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .nav-bar a {
+    padding: 12px 20px;
+    font-size: 0.95rem;
+  }
+}
+
+/* ───────────── Fade-in for dynamic content ───────────── */
+#content {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+#content.loaded {
+  opacity: 1;
+}
