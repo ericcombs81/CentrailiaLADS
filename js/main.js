@@ -7,21 +7,27 @@ document.addEventListener("DOMContentLoaded", () => {
   content.classList.remove("loaded"); // fade out old content
 
   try {
-    const response = await fetch(`pages/${page}.html`);
-    if (!response.ok) throw new Error(`Failed to load ${page}.html`);
+    const response = await fetch(`pages/${page}.php`);
+    if (!response.ok) throw new Error(`Failed to load ${page}.php`);
     const html = await response.text();
 
     content.innerHTML = html;
 
     // Run page-specific JS
-    if (page === "student") {
-      const module = await import(`../js/student.js`);
-      module.initStudentPage();
-    } 
-    else if (page === "student-master") {
-      const module = await import(`../js/student-master.js`);
-      if (module.initStudentMasterPage) module.initStudentMasterPage();
-    }
+    // Run page-specific JS
+if (page === "student") {
+  const { initStudentPage } = await import(new URL("./student.js", import.meta.url));
+  initStudentPage();
+} else if (page === "student-master") {
+  const { initStudentMasterPage } = await import(new URL("./student-master.js", import.meta.url));
+  initStudentMasterPage?.();
+} else if (page === "chart-behavior") {
+  const { initChartByBehaviorPage } = await import(new URL("./chart-behavior.js", import.meta.url));
+  initChartByBehaviorPage?.();
+} else if (page === "enrolled-dropped") {
+  const { initEnrolledDroppedPage } = await import(new URL("./enrolled-dropped.js", import.meta.url));
+  initEnrolledDroppedPage?.();
+}
 
     // Slight delay ensures layout and CSS are ready before fade-in
     requestAnimationFrame(() => content.classList.add("loaded"));
@@ -35,8 +41,6 @@ document.addEventListener("DOMContentLoaded", () => {
     content.classList.add("loaded");
   }
 }
-
-
 
   links.forEach(link => {
     link.addEventListener("click", e => {

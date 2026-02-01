@@ -1,9 +1,14 @@
-<!DOCTYPE html>
+<?php
+require_once "config/db.php";
+?>
+
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <title>LADS App</title>
 <link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/chart-behavior.css">
+
 </head>
 <body>
 
@@ -27,26 +32,34 @@
 <!-- Navigation bar -->
 <nav class="nav-bar">
   <ul>
+    <!-- Regular link -->
     <li><a href="#" data-page="student" class="active">Student</a></li>
+
+    <!-- ADMIN Dropdown (no link) -->
     <li class="has-dropdown">
-  <a href="#" data-page="admin">Admin</a>
-  <ul class="dropdown">
-    <li><a href="#" data-page="calendar">School Calendar</a></li>
-    <li><a href="#" data-page="student-master">Student Master</a></li>
-    <li><a href="#" data-page="enrolled-dropped">Students Enrolled / Dropped</a></li>
-    <li><a href="#" data-page="behavior">Behavior</a></li>
-    <li><a href="#" data-page="staff">Staff</a></li>
-    <li><a href="#" data-page="users">Users</a></li>
-  </ul>
-</li>
+      <span class="nav-label">Admin ▾</span>
+      <ul class="dropdown">
+        <li><a href="#" data-page="calendar">School Calendar</a></li>
+        <li><a href="#" data-page="student-master">Student Master</a></li>
+        <li><a href="#" data-page="enrolled-dropped">Students Enrolled / Dropped</a></li>
+        <li><a href="#" data-page="behavior">Behavior</a></li>
+        <li><a href="#" data-page="staff">Staff</a></li>
+        <li><a href="#" data-page="users">Users</a></li>
+      </ul>
+    </li>
+
+    <!-- REPORTS Dropdown (no link) -->
     <li class="has-dropdown">
-  <a href="#" data-page="reports">Reports</a>
-  <ul class="dropdown">
-    <li><a href="#" data-page="point-averages">Point Sheet Averages</a></li>
-    <li><a href="#" data-page="chart-month">Point Sheet Chart by Month</a></li>
-    <li><a href="#" data-page="chart-behavior">Point Sheet Chart by Behavior</a></li>
+      <span class="nav-label">Reports ▾</span>
+      <ul class="dropdown">
+        <li><a href="#" data-page="point-averages">Point Sheet Averages</a></li>
+        <li><a href="#" data-page="chart-month">Point Sheet Chart by Month</a></li>
+        <li><a href="#" data-page="chart-behavior">Point Sheet Chart by Behavior</a></li>
+      </ul>
+    </li>
   </ul>
-</li>
+</nav>
+
 
   </ul>
 </nav>

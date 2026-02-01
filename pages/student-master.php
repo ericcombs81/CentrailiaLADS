@@ -1,4 +1,13 @@
+<?php
+require_once "../config/db.php";
+?>
+
 <link rel="stylesheet" href="css/student-master.css">
+<script type="module">
+  import { initStudentMasterPage } from "../js/studentMaster.js";
+  initStudentMasterPage();
+</script>
+
 
 <div class="student-master">
   <div class="header-row">
@@ -13,18 +22,13 @@
     <th>ID</th>
     <th class="sortable" data-key="last">Last Name</th>
     <th class="sortable" data-key="first">First Name</th>
-    <th>Address</th>
-    <th>City</th>
-    <th>State</th>
-    <th>Zip</th>
-    <th>Phone</th>
-    <th>
-      Status
-      <select id="statusFilter">
-        <option value="all">All</option>
-        <option value="Active">Active</option>
-        <option value="Inactive">Inactive</option>
-      </select>
+    <th>Status<select id="statusFilter">
+      <option value="all">All</option>
+      <option value="Active" selected>Active</option>
+      <option value="Inactive">Inactive</option>
+    </th>
+</select>
+
     </th>
   </tr>
 </thead>
@@ -42,11 +46,6 @@
       <div class="form-grid">
         <label>First Name:</label><input type="text">
         <label>Last Name:</label><input type="text">
-        <label>Address:</label><input type="text">
-        <label>City:</label><input type="text">
-        <label>State:</label><input type="text" maxlength="2">
-        <label>Zip:</label><input type="text">
-        <label>Phone:</label><input type="text">
       </div>
       <button type="submit" class="btn-submit">Enroll</button>
     </form>

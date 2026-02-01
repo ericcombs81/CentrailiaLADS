@@ -1,0 +1,150 @@
+.report-behavior {
+  background: #f5f6f8;
+  padding: 24px 30px;
+  font-family: 'Roboto Condensed', Arial, sans-serif;
+}
+
+.report-header h2 {
+  color: #cc0100;
+  margin: 0 0 14px;
+  border-bottom: 2px solid #cc0100;
+  padding-bottom: 6px;
+}
+
+.report-body {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 24px;
+}
+
+/* Controls card (echoes your app’s cards/buttons) */
+.report-controls {
+  background: #fff;
+  border-radius: 12px;
+  padding: 18px;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+  display: grid;
+  gap: 12px;
+  align-content: start;
+}
+
+.control-row {
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  align-items: center;
+  gap: 10px;
+}
+
+.report-controls input[type="date"],
+.report-controls select {
+  padding: 8px 10px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 1rem;
+}
+
+.buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.btn-primary,
+.btn-secondary {
+  border: none;
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform .08s ease, background .2s ease;
+}
+
+.btn-primary { background: #cc0100; color: #fff; }
+.btn-primary:hover { background: #e40000; transform: translateY(-1px); }
+.btn-secondary { background: #fff; color: #cc0100; border: 2px solid #cc0100; }
+.btn-secondary:hover { background: #fff5f5; transform: translateY(-1px); }
+
+/* Preview paper */
+.report-preview { display: grid; }
+.paper {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+  padding: 18px 20px 10px;
+}
+
+.paper-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 10px;
+}
+
+.paper-title .paper-school { font-weight: 700; }
+.paper-title .paper-report { font-size: 1.05rem; }
+.paper-meta { text-align: right; font-size: .95rem; }
+.paper-meta strong { font-weight: 700; }
+
+.chart-wrap { padding: 8px 0 2px; }
+.chart {
+  width: 80%;        /* or try 400px */
+  height: auto;
+  display: block;
+  margin: 0 auto;    /* centers it */
+  border-left: 1px solid #ddd;
+  border-bottom: 1px solid #ddd;
+}
+
+/* Chart axes/labels */
+.chart .axis { stroke: #888; stroke-width: 1; }
+.chart .grid { stroke: #e5e5e5; stroke-width: 1; }
+.chart .series { fill: none; stroke-width: 2.5; }
+.chart .point { r: 3.5; }
+
+/* Keep the color scheme minimal; your global palette is red/gray */
+.series { stroke: #cc0100; }      /* Hershey red line */
+.point  { fill:  #cc0100; }
+.legend .dot { background: #cc0100; }  /* match legend dot */
+
+
+.paper-foot {
+  display: flex;
+  justify-content: space-between;
+  border-top: 1px solid #eee;
+  padding-top: 8px;
+  font-size: .95rem;
+}
+
+.legend .dot {
+  display: inline-block;
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: #1f77b4;
+  margin-right: 6px;
+}
+
+/* Print */
+@media print {
+  .report-controls { display: none; }
+  .report-behavior, .paper { box-shadow: none; }
+  .paper { padding: 0; }
+}
+/* Make grid children allow shrinking inside the controls card */
+.report-controls .control-row > input[type="date"],
+.report-controls .control-row > select {
+  width: 100%;
+  min-width: 0;          /* <-- key to prevent overflow in CSS Grid */
+  box-sizing: border-box;
+}
+
+/* (Optional) ensure the label column doesn't force overflow */
+.report-controls .control-row {
+  grid-template-columns: 110px 1fr;  /* label / field */
+  align-items: center;
+}
+
+.report-controls .control-row label {
+  white-space: nowrap;
+}
+

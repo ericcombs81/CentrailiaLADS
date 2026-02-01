@@ -227,6 +227,29 @@ body {
   border-bottom: 1px solid rgba(255,255,255,0.15);
 }
 
+/* ───────────── Non-clickable dropdown headers (Admin / Reports) ───────────── */
+.nav-label {
+  color: white;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 1.1rem;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  padding: 8px 24px;
+  user-select: none;
+  cursor: pointer;
+}
+
+.nav-label:hover {
+  background-color: #b00000; /* same hover as links */
+}
+
+/* Optional: small down arrow for consistency */
+.nav-label::after {
+  font-size: 0.8em;
+}
+
+
 
 /* ───────────── Page content ───────────── */
 main {

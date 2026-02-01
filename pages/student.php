@@ -1,3 +1,6 @@
+<?php
+require_once "../config/db.php";
+?>
 
 <link rel="stylesheet" href="css/student.css">
 <div class="student-form">
