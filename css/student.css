@@ -63,7 +63,11 @@
 /* Behavior table */
 .behavior-table {
   overflow-x: auto;
+  width: 100%;
+  margin: 0 auto;       /* centers it nicely inside the card */
+  box-sizing: border-box;
 }
+
 
 .behavior-table table {
   width: 100%;
@@ -107,8 +111,12 @@
 
 /* Comments */
 .form-comments {
-  margin-top: 25px;
+  display: block;
+  width: 100%;
+  margin-top: 20px;   /* spacing from the table */
+  clear: both;        /* in case anything is floated */
 }
+
 
 .form-comments textarea {
   width: 100%;
@@ -118,3 +126,10 @@
   border: 1px solid #ccc;
   resize: vertical;
 }
+
+/* Limit the height of the student dropdown */
+.student {
+  max-height: 100px;          /* ~10 items depending on line-height */
+  overflow-y: auto;
+}
+

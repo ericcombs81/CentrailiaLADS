@@ -54,8 +54,15 @@
 /* Table layout */
 table {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
   min-width: 800px;
+}
+
+thead {
+  position: sticky;
+  top: 0;
+  z-index: 20;
 }
 
 /* Sticky header row */
@@ -66,10 +73,53 @@ thead th {
   border: 1px solid #b00000;
   text-align: left;
   font-weight: 600;
-  position: sticky;
+  position: static;
   top: 0;
   z-index: 10;
 }
+
+/* Sticky LEFT column: ID (1st column) */
+thead th:nth-child(1),
+tbody td:nth-child(1) {
+  position: sticky;
+  left: 0;
+  z-index: 5;
+  background: #fafafa; /* must be opaque or you'll see bleed-through */
+}
+
+/* Sticky RIGHT column: Status (5th column) */
+thead th:nth-child(5),
+tbody td:nth-child(5) {
+  position: sticky;
+  right: 0;
+  z-index: 5;
+  background: #fafafa; /* must be opaque */
+}
+
+/* Make the header cells that are also sticky sit above everything */
+thead th:nth-child(1),
+thead th:nth-child(5) {
+  z-index: 11;
+  background: #cc0100; /* match your header color */
+  color: white;
+}
+
+/* Sticky RIGHT column: Action (6th column) */
+thead th:nth-child(6),
+tbody td:nth-child(6) {
+  position: sticky;
+  right: 0;
+  z-index: 5;
+  background: #fafafa;
+}
+
+/* Header cell that is also sticky */
+thead th:nth-child(6) {
+  z-index: 11;
+  background: #cc0100;
+  color: white;
+}
+
 
 td {
   border: 1px solid #ddd;
@@ -123,7 +173,8 @@ tbody tr:hover td {
   background: #fff;
   padding: 25px 35px;
   border-radius: 12px;
-  width: 450px;
+  width: 650px;
+  max-width: 90vw;
   box-shadow: 0 4px 16px rgba(0,0,0,0.2);
   position: relative;
 }
@@ -146,17 +197,22 @@ tbody tr:hover td {
 /* ───────────── Enroll Form ───────────── */
 .form-grid {
   display: grid;
-  grid-template-columns: 1fr 2fr;
+  grid-template-columns: 140px 2fr;
   gap: 10px 15px;
   margin-top: 15px;
 }
 
-input[type="text"] {
+/* Make text + number inputs match inside the enroll modal grid */
+.form-grid input[type="text"],
+.form-grid input[type="number"],
+.form-grid select {
+  width: 100%;
   padding: 6px;
   border: 1px solid #ccc;
   border-radius: 6px;
   font-size: 0.95rem;
   font-family: 'Roboto Condensed', sans-serif;
+  box-sizing: border-box;
 }
 
 /* Submit button */
@@ -220,4 +276,30 @@ th.sortable.desc::after {
   background: white;
   cursor: pointer;
 }
+
+/* Row action button: Edit */
+.btn-edit {
+  background: linear-gradient(180deg, #ffffff 0%, #f4f4f4 100%);
+  color: #cc0100;
+  border: 1px solid #d6d6d6;
+  padding: 6px 12px;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform .08s ease, box-shadow .2s ease, background .2s ease, border-color .2s ease;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+}
+
+.btn-edit:hover {
+  background: linear-gradient(180deg, #fff5f5 0%, #ffecec 100%);
+  border-color: #cc0100;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.12);
+}
+
+.btn-edit:active {
+  transform: translateY(0px);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.10) inset;
+}
+
 

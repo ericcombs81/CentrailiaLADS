@@ -1,89 +1,105 @@
 .enrolled-dropped {
-  background: #fff;
+  background: #ffffff;
   border-radius: 12px;
   padding: 30px 40px;
   box-shadow: 0 3px 8px rgba(0,0,0,0.08);
   max-width: 1100px;
-  margin: 30px auto;
+  margin: 10px auto;
   font-family: 'Roboto Condensed', sans-serif;
+  transition: box-shadow 0.3s ease;
 }
 
-/* Header */
+.enrolled-dropped:hover {
+  box-shadow:
+    0 4px 16px rgba(0,0,0,0.15),
+    0 0 12px rgba(204, 1, 0, 0.15);
+}
+
+/* Header Row */
+.header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 15px;
+}
+
 .header-row h2 {
   color: #cc0100;
   border-bottom: 2px solid #cc0100;
   padding-bottom: 6px;
-  margin-bottom: 15px;
+  margin: 0;
 }
 
-/* Drop controls */
-.drop-controls {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 20px;
-  flex-wrap: wrap;
-}
-
-.drop-controls label {
-  font-weight: 600;
-}
-
-.drop-controls input[type="date"] {
-  padding: 6px 10px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  font-size: 1rem;
-}
-
+/* Drop button */
 .btn-drop {
   background: #cc0100;
   color: white;
   border: none;
-  padding: 8px 16px;
+  padding: 8px 18px;
   border-radius: 8px;
+  font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.2s ease;
+  transition: background 0.2s ease, transform 0.1s ease;
 }
 
 .btn-drop:hover {
   background: #e40000;
+  transform: translateY(-2px);
 }
 
-/* Table */
+.btn-drop:active {
+  transform: translateY(0px);
+}
+
+/* Table container + sticky header */
 .table-container {
   max-height: 450px;
   overflow-y: auto;
+  overflow-x: auto;
   border: 1px solid #ddd;
   border-radius: 8px;
 }
 
 table {
   width: 100%;
-  border-collapse: collapse;
-  min-width: 900px;
+  border-collapse: separate;
+  border-spacing: 0;
+  min-width: 600px;
 }
 
-th {
+thead {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+
+thead th {
   background: #cc0100;
   color: white;
   padding: 10px;
   border: 1px solid #b00000;
   text-align: left;
   font-weight: 600;
-  position: sticky;
+  position: static;
   top: 0;
+  z-index: 10;
 }
 
 td {
   border: 1px solid #ddd;
   padding: 8px;
   background: #fafafa;
+  white-space: nowrap;
 }
 
 tbody tr:nth-child(even) td {
   background: #f5f5f5;
+}
+
+tbody tr:hover td {
+  background: #fff4f4;
 }
 
 /* Sortable headers */
@@ -96,27 +112,21 @@ th.sortable::after {
   content: '⇅';
   font-size: 1em;
   margin-left: 6px;
-  opacity: 0.9;
+  opacity: 0.8;
   color: #fff;
+  transition: transform 0.2s ease, opacity 0.2s ease;
 }
 
-th.sortable.asc::after {
-  content: '▲';
+th.sortable:hover::after {
+  opacity: 1;
+  transform: scale(1.15);
 }
 
-th.sortable.desc::after {
-  content: '▼';
-}
+th.sortable.asc::after { content: '▲'; opacity: 1; }
+th.sortable.desc::after { content: '▼'; opacity: 1; }
 
-/* Status filter */
-#statusFilter {
-  margin-left: 6px;
-  padding: 2px 4px;
-  font-size: 0.85rem;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  background: white;
-}
+/* Centered columns */
+.center { text-align: center; }
 
 /* Checkbox column */
 td input[type="checkbox"] {
@@ -127,8 +137,15 @@ td input[type="checkbox"] {
   margin: 0 auto;
 }
 
-th:last-child {
-  text-align: center;
-  vertical-align: middle;
+/* Scrollbar */
+.table-container::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
 }
-
+.table-container::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 5px;
+}
+.table-container::-webkit-scrollbar-thumb:hover {
+  background: #999;
+}

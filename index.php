@@ -43,7 +43,6 @@ require_once "config/db.php";
         <li><a href="#" data-page="student-master">Student Master</a></li>
         <li><a href="#" data-page="enrolled-dropped">Students Enrolled / Dropped</a></li>
         <li><a href="#" data-page="behavior">Behavior</a></li>
-        <li><a href="#" data-page="staff">Staff</a></li>
         <li><a href="#" data-page="users">Users</a></li>
       </ul>
     </li>
@@ -67,7 +66,8 @@ require_once "config/db.php";
 <main id="content">
 </main>
 
-<script type="module" src="js/main.js"></script>
+<script type="module" src="js/main.js?v=<?php echo filemtime(__DIR__ . '/js/main.js'); ?>"></script>
+
 
 </body>
 </html>

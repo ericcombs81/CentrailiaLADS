@@ -6,6 +6,7 @@ body {
   background: #f5f6f8;
 }
 
+
 /* ───────────── Top red line with arc ───────────── */
 .header-top {
   background: #cc0100;
@@ -192,7 +193,7 @@ body {
   min-width: 240px;
   border-radius: 0 0 6px 6px;
   box-shadow: 0 4px 8px rgba(0,0,0,0.25);
-  z-index: 99;
+  z-index: 3000;
 }
 
 /* Show dropdown on hover */
@@ -307,3 +308,5 @@ main {
 #content.loaded {
   opacity: 1;
 }
+
+

@@ -2,7 +2,7 @@
 require_once "../config/db.php";
 ?>
 
-<link rel="stylesheet" href="css/student.css">
+<link rel="stylesheet" href="css/student.css?v=5">
 <div class="student-form">
   <h2>Daily Point Sheet</h2>
 
@@ -18,12 +18,10 @@ require_once "../config/db.php";
         <label for="student">Student:</label>
         <select id="student" name="student">
           <option value="">Select student...</option>
-          <option value="john">John Smith</option>
-          <option value="jane">Jane Doe</option>
-          <option value="sam">Sam Wilson</option>
         </select>
       </div>
 
+      <!--
       <div class="form-group small">
         <label>Present for</label>
         <input type="number" id="periods" name="periods" min="0" max="9">
@@ -37,6 +35,7 @@ require_once "../config/db.php";
         <label><input type="checkbox" id="unexcused"> Unexcused</label>
       </div>
     </div>
+    -->
 
     <!-- Behavior table -->
     <div class="behavior-table">

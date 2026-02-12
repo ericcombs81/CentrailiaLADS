@@ -1,3 +1,5 @@
+const v = Date.now(); // dev only
+
 document.addEventListener("DOMContentLoaded", () => {
   const content = document.getElementById("content");
   const links = document.querySelectorAll(".nav-bar a");
@@ -16,18 +18,30 @@ document.addEventListener("DOMContentLoaded", () => {
     // Run page-specific JS
     // Run page-specific JS
 if (page === "student") {
-  const { initStudentPage } = await import(new URL("./student.js", import.meta.url));
+  const { initStudentPage } = await import(new URL("./student.js?v=${v}", import.meta.url));
   initStudentPage();
 } else if (page === "student-master") {
-  const { initStudentMasterPage } = await import(new URL("./student-master.js", import.meta.url));
+  const { initStudentMasterPage } = await import(
+    new URL("./student-master.js?v=${v}", import.meta.url)
+  );
   initStudentMasterPage?.();
 } else if (page === "chart-behavior") {
-  const { initChartByBehaviorPage } = await import(new URL("./chart-behavior.js", import.meta.url));
+  const { initChartByBehaviorPage } = await import(new URL("./chart-behavior.js?v=${v}", import.meta.url));
   initChartByBehaviorPage?.();
 } else if (page === "enrolled-dropped") {
-  const { initEnrolledDroppedPage } = await import(new URL("./enrolled-dropped.js", import.meta.url));
+  const { initEnrolledDroppedPage } = await import(new URL("./enrolled-dropped.js?v=${v}", import.meta.url));
   initEnrolledDroppedPage?.();
+} else if (page === "users") {
+  const v = Date.now();
+  const { initUsersPage } = await import(new URL(`./users.js?v=${v}`, import.meta.url));
+  initUsersPage?.();
+} else if (page === "behavior") {
+  const v = Date.now();
+  const { initBehaviorPage } = await import(new URL(`./behavior.js?v=${v}`, import.meta.url));
+  initBehaviorPage?.();
 }
+
+
 
     // Slight delay ensures layout and CSS are ready before fade-in
     requestAnimationFrame(() => content.classList.add("loaded"));
@@ -37,7 +51,7 @@ if (page === "student") {
     document.querySelector(`[data-page="${page}"]`).classList.add("active");
   } catch (err) {
     console.error(err);
-    content.innerHTML = `<p style="color:red;">Error loading page: ${page}.html</p>`;
+    content.innerHTML = `<p style="color:red;">Error loading page: ${page}.php</p>`;
     content.classList.add("loaded");
   }
 }
