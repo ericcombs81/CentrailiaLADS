@@ -14,7 +14,7 @@ require_once "../config/db.php";
     <table>
       <thead>
         <tr>
-          <th class="sortable" data-key="id">ID</th>
+          <!-- ✅ ID column removed -->
           <th class="sortable" data-key="first">First Name</th>
           <th class="sortable" data-key="last">Last Name</th>
           <th class="sortable" data-key="email">Email</th>

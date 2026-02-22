@@ -6,15 +6,19 @@ require_once "../config/db.php";
 
 <div class="student-master">
   <div class="header-row">
-    <h2>Student Master</h2>
+  <h2>Student Master</h2>
+
+  <div class="header-actions">
+    <button id="gradePlusBtn" class="btn-add btn-secondary">Grade +</button>
+    <button id="gradeMinusBtn" class="btn-add btn-secondary">Grade -</button>
     <button id="addStudentBtn" class="btn-add">+ Enroll New Student</button>
   </div>
+</div>
 
   <div class="table-container">
     <table>
       <thead>
   <tr>
-    <th>ID</th>
     <th class="sortable" data-key="last">Last Name</th>
     <th class="sortable" data-key="first">First Name</th>
     <th class="sortable" data-key="grade">Grade</th>

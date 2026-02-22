@@ -63,6 +63,8 @@ async function loadActiveStudentsIntoDropdown() {
   const json = await res.json();
   if (!json.ok) throw new Error(json.error || "Failed to load students");
 
+  // ✅ label: "Last, First"
+  // ✅ sort: last then first
   allActiveStudents = (json.data || [])
     .filter((s) => Number(s.statusValue) === 1)
     .map((s) => {
@@ -72,15 +74,19 @@ async function loadActiveStudentsIntoDropdown() {
         id: String(s.id),
         first,
         last,
-        label: `${first} ${last}`.trim(),
+        label: `${last}, ${first}`.trim(),
       };
     })
-    .sort((a, b) => a.label.localeCompare(b.label));
+    .sort((a, b) => {
+      const lastCmp = a.last.localeCompare(b.last);
+      if (lastCmp !== 0) return lastCmp;
+      return a.first.localeCompare(b.first);
+    });
 
   allActiveStudents.forEach((s) => {
     const opt = document.createElement("option");
     opt.value = s.id;
-    opt.textContent = s.label;
+    opt.textContent = s.label; // "Last, First"
     sel.appendChild(opt);
   });
 }
@@ -102,8 +108,9 @@ function initStudentTypeahead() {
 
     return allActiveStudents
       .filter((s) => {
-        const a = normalize(s.label);
-        const b = normalize(`${s.last} ${s.first}`);
+        // ✅ match both "last, first" (label) and "first last"
+        const a = normalize(s.label);              // "last, first"
+        const b = normalize(`${s.first} ${s.last}`); // "first last"
         return a.includes(query) || b.includes(query);
       })
       .slice(0, 50);
@@ -424,4 +431,3 @@ export async function initCustomizeBehaviorsPage() {
   updateTotal();
   renderBehaviorTable([]);
 }
-

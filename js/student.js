@@ -157,16 +157,22 @@ async function loadActiveStudentsIntoDropdown() {
           id: String(s.id),
           first,
           last,
-          label: `${first} ${last}`.trim(),
+          // ✅ Dropdown label: Last, First
+          label: `${last}, ${first}`.trim(),
         };
       })
-      .sort((a, b) => a.label.localeCompare(b.label));
+      // ✅ Sort by Last then First (not by label)
+      .sort((a, b) => {
+        const lastCmp = a.last.localeCompare(b.last);
+        if (lastCmp !== 0) return lastCmp;
+        return a.first.localeCompare(b.first);
+      });
 
     // Fill dropdown once (full list)
     allActiveStudents.forEach((s) => {
       const opt = document.createElement("option");
       opt.value = s.id;
-      opt.textContent = s.label;
+      opt.textContent = s.label; // "Last, First"
       sel.appendChild(opt);
     });
   } catch (err) {
@@ -201,8 +207,8 @@ function initStudentTypeahead() {
 
     return allActiveStudents
       .filter((s) => {
-        const a = normalize(s.label); // "first last"
-        const b = normalize(`${s.last} ${s.first}`); // "last first"
+        const a = normalize(s.label); // "last, first"
+        const b = normalize(`${s.first} ${s.last}`); // "first last"
         return a.includes(query) || b.includes(query);
       })
       .slice(0, 50);

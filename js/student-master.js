@@ -5,26 +5,31 @@ export async function initStudentMasterPage() {
   const addBtn = document.getElementById("addStudentBtn");
   const statusFilter = document.getElementById("statusFilter");
 
+  const gradePlusBtn = document.getElementById("gradePlusBtn");
+  const gradeMinusBtn = document.getElementById("gradeMinusBtn");
+
   const editModal = document.getElementById("editModal");
-const editCloseBtn = document.getElementById("editCloseBtn");
+  const editCloseBtn = document.getElementById("editCloseBtn");
 
-const editForm = document.getElementById("editForm");
-const editId = document.getElementById("editId");
-const editFirst = document.getElementById("editFirst");
-const editLast = document.getElementById("editLast");
-const editGrade = document.getElementById("editGrade");
-const editStatus = document.getElementById("editStatus");
-
-if (editCloseBtn) editCloseBtn.onclick = () => (editModal.style.display = "none");
-
-
-window.addEventListener("click", (e) => {
-  if (e.target === editModal) editModal.style.display = "none";
-});
-
-
+  const editForm = document.getElementById("editForm");
+  const editId = document.getElementById("editId");
+  const editFirst = document.getElementById("editFirst");
+  const editLast = document.getElementById("editLast");
+  const editGrade = document.getElementById("editGrade");
+  const editStatus = document.getElementById("editStatus");
 
   if (!tbody) return;
+
+  // Close edit modal
+  editCloseBtn?.addEventListener("click", () => {
+    editModal.style.display = "none";
+  });
+
+  // Click outside modals closes them
+  window.addEventListener("click", (e) => {
+    if (e.target === modal) modal.style.display = "none";
+    if (e.target === editModal) editModal.style.display = "none";
+  });
 
   // ───────────── State ─────────────
   let students = [];
@@ -34,20 +39,32 @@ window.addEventListener("click", (e) => {
 
   if (statusFilter) statusFilter.value = "Active";
 
-  // ───────────── Load students from API ─────────────
-  try {
-    const res = await fetch("api/student/list.php", { cache: "no-store" });
+  // ───────────── Helpers ─────────────
+  function escapeHtml(str) {
+    return String(str).replace(/[&<>"']/g, (m) =>
+      ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#039;",
+      }[m])
+    );
+  }
+
+  // Display clamp only (DB grade can be any integer)
+  function formatGrade(s) {
+    const g = Number(s?.grade ?? 0);
+    if (g > 12) return "12+";
+    if (g < 1) return "1";
+    return String(g || "");
+  }
+
+  async function loadStudents() {
+    const res = await fetch("api/student/list.php?v=" + Date.now(), { cache: "no-store" });
     const json = await res.json();
     if (!json.ok) throw new Error(json.error || "Failed to load students");
     students = json.data || [];
-  } catch (err) {
-    console.error(err);
-    tbody.innerHTML = `
-      <tr>
-        <td colspan="6" style="color:red;">Failed to load students.</td>
-      </tr>
-    `;
-    return;
   }
 
   // ───────────── Render table ─────────────
@@ -55,13 +72,12 @@ window.addEventListener("click", (e) => {
     tbody.innerHTML = "";
 
     const want = (filter || "all").trim();
-    let filtered = want === "all"
-      ? [...students]
-      : students.filter(s => (s.status || "").trim() === want);
+    let filtered =
+      want === "all" ? [...students] : students.filter((s) => (s.status || "").trim() === want);
 
     if (currentSortKey) {
       filtered.sort((a, b) => {
-        const isNumeric = k => k === "id" || k === "grade";
+        const isNumeric = (k) => k === "grade";
 
         if (isNumeric(currentSortKey)) {
           const na = Number(a[currentSortKey] ?? 0);
@@ -78,59 +94,58 @@ window.addEventListener("click", (e) => {
     }
 
     if (filtered.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="6">No students found.</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="5">No students found.</td></tr>`;
       return;
     }
 
-    filtered.forEach(s => {
+    filtered.forEach((s) => {
       const row = document.createElement("tr");
-row.innerHTML = `
-  <td>${s.id}</td>
-  <td>${escapeHtml(s.last)}</td>
-  <td>${escapeHtml(s.first)}</td>
-  <td>${Number(s.grade ?? "")}</td>
-  <td>${Number(s.statusValue) === 1 ? "Active" : "Inactive"}</td>
-  <td>
-    <button class="btn-edit"
-      data-id="${s.id}"
-      data-first="${escapeHtml(s.first)}"
-      data-last="${escapeHtml(s.last)}"
-      data-grade="${Number(s.grade ?? "")}"
-      data-status-value="${Number(s.status)}">
-      Edit
-    </button>
-  </td>
-`;
-
-
+      row.innerHTML = `
+        <td>${escapeHtml(s.last)}</td>
+        <td>${escapeHtml(s.first)}</td>
+        <td>${formatGrade(s)}</td>
+        <td>${Number(s.statusValue) === 1 ? "Active" : "Inactive"}</td>
+        <td>
+          <button class="btn-edit" data-id="${s.id}">Edit</button>
+        </td>
+      `;
       tbody.appendChild(row);
     });
   }
 
-  tbody.addEventListener("click", (e) => {
-  const btn = e.target.closest(".btn-edit");
-  if (!btn) return;
+  // ───────────── Bulk grade shift ─────────────
+  async function shiftAllGrades(delta) {
+    const label = delta > 0 ? "Grade +" : "Grade -";
+    if (!confirm(`${label} will update EVERY student in the database. Continue?`)) return;
 
-  const id = Number(btn.getAttribute("data-id"));
-  const s = students.find(x => Number(x.id) === id);
-  if (!s) return;
+    try {
+      const body = new URLSearchParams();
+      body.set("delta", String(delta));
 
-  editId.value = String(s.id);
-  editFirst.value = s.first ?? "";
-  editLast.value = s.last ?? "";
-  editGrade.value = String(s.grade ?? "");
-  const sv = (s.statusValue ?? s.status);
-editStatus.value = String(Number(sv) === 1 ? 1 : 0);
+      const res = await fetch("api/student/grade-shift.php?v=" + Date.now(), {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: body.toString(),
+        cache: "no-store",
+      });
 
+      const json = await res.json();
+      if (!json.ok) throw new Error(json.error || "Grade shift failed.");
 
+      await loadStudents();
+      renderTable();
+    } catch (err) {
+      console.error(err);
+      alert(err.message || String(err));
+    }
+  }
 
-  editModal.style.display = "flex";
-});
-
+  gradePlusBtn?.addEventListener("click", () => shiftAllGrades(1));
+  gradeMinusBtn?.addEventListener("click", () => shiftAllGrades(-1));
 
   // ───────────── Sorting ─────────────
-  document.querySelectorAll("th.sortable").forEach(th => {
-    th.onclick = () => {
+  document.querySelectorAll("th.sortable").forEach((th) => {
+    th.addEventListener("click", () => {
       const key = th.getAttribute("data-key");
       if (!key) return;
 
@@ -141,127 +156,126 @@ editStatus.value = String(Number(sv) === 1 ? 1 : 0);
         currentSortDir = "asc";
       }
 
-      document.querySelectorAll("th.sortable")
-        .forEach(h => h.classList.remove("asc", "desc"));
+      document.querySelectorAll("th.sortable").forEach((h) => h.classList.remove("asc", "desc"));
       th.classList.add(currentSortDir);
 
       renderTable();
-    };
+    });
   });
 
-  // ───────────── Filter dropdown ─────────────
-  if (statusFilter) {
-    statusFilter.onchange = () => {
-      currentFilter = statusFilter.value;
-      renderTable();
-    };
-  }
+  // ───────────── Filter ─────────────
+  statusFilter?.addEventListener("change", () => {
+    currentFilter = statusFilter.value;
+    renderTable();
+  });
 
-  // ───────────── Modal open / close ─────────────
-  if (addBtn) addBtn.onclick = () => (modal.style.display = "flex");
-  if (closeBtn) closeBtn.onclick = () => (modal.style.display = "none");
+  // ───────────── Enroll modal ─────────────
+  addBtn?.addEventListener("click", () => {
+    modal.style.display = "flex";
+  });
 
-  window.onclick = e => {
-    if (e.target === modal) modal.style.display = "none";
-  };
+  closeBtn?.addEventListener("click", () => {
+    modal.style.display = "none";
+  });
 
   // ───────────── Enroll form submit ─────────────
   const form = document.getElementById("enrollForm");
   const firstInput = document.getElementById("firstInput");
-  const lastInput  = document.getElementById("lastInput");
+  const lastInput = document.getElementById("lastInput");
   const gradeInput = document.getElementById("gradeInput");
 
-  if (form) {
-    form.onsubmit = async (e) => {
-      e.preventDefault();
+  form?.addEventListener("submit", async (e) => {
+    e.preventDefault();
 
-      const first = firstInput?.value.trim() || "";
-      const last  = lastInput?.value.trim() || "";
-      const grade = Number(gradeInput?.value || 0);
+    const first = firstInput?.value.trim() || "";
+    const last = lastInput?.value.trim() || "";
+    const grade = Number(gradeInput?.value || 1);
 
-      const body = new URLSearchParams();
-      body.set("first", first);
-      body.set("last", last);
-      body.set("grade", String(grade));
+    const body = new URLSearchParams();
+    body.set("first", first);
+    body.set("last", last);
+    body.set("grade", String(grade));
 
-      try {
-        const res = await fetch("api/student/create.php", {
-          method: "POST",
-          headers: { "Content-Type": "application/x-www-form-urlencoded" },
-          body: body.toString(),
-          cache: "no-store"
-        });
+    try {
+      const res = await fetch("api/student/create.php?v=" + Date.now(), {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: body.toString(),
+        cache: "no-store",
+      });
 
-        const json = await res.json();
-        if (!json.ok) throw new Error(json.error || "Enroll failed.");
+      const json = await res.json();
+      if (!json.ok) throw new Error(json.error || "Enroll failed.");
 
-        students.push(json.data);
+      await loadStudents();
+      currentFilter = "Active";
+      if (statusFilter) statusFilter.value = "Active";
 
-        // Ensure new student is visible
-        currentFilter = "Active";
-        if (statusFilter) statusFilter.value = "Active";
+      modal.style.display = "none";
+      form.reset();
+      renderTable();
+    } catch (err) {
+      console.error(err);
+      alert(err.message || String(err));
+    }
+  });
 
-        modal.style.display = "none";
-        form.reset();
-        renderTable();
-      } catch (err) {
-        console.error(err);
-        alert(err.message);
-      }
-    };
-  }
+  // ───────────── Edit modal open ─────────────
+  tbody.addEventListener("click", (e) => {
+    const btn = e.target.closest(".btn-edit");
+    if (!btn) return;
 
-  // Initial render
-  renderTable("Active");
+    const id = Number(btn.getAttribute("data-id"));
+    const s = students.find((x) => Number(x.id) === id);
+    if (!s) return;
 
+    editId.value = String(s.id);
+    editFirst.value = s.first ?? "";
+    editLast.value = s.last ?? "";
+    editGrade.value = String(s.grade ?? "");
+    const sv = s.statusValue ?? s.status;
+    editStatus.value = String(Number(sv) === 1 ? 1 : 0);
 
-// ───────────── Helpers ─────────────
-function escapeHtml(str) {
-  return String(str).replace(/[&<>"']/g, m => ({
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    '"': "&quot;",
-    "'": "&#039;"
-  }[m]));
-}
+    editModal.style.display = "flex";
+  });
 
-if (editForm) {
-  editForm.onsubmit = async (e) => {
+  // ───────────── Edit form submit ─────────────
+  editForm?.addEventListener("submit", async (e) => {
     e.preventDefault();
 
     const body = new URLSearchParams();
     body.set("id", editId.value);
     body.set("first", editFirst.value.trim());
     body.set("last", editLast.value.trim());
-    body.set("grade", String(Number(editGrade.value || 0)));
+    body.set("grade", String(Number(editGrade.value || 1)));
     body.set("status", editStatus.value);
 
     try {
       const res = await fetch("api/student/update.php?v=" + Date.now(), {
-  method: "POST",
-  headers: { "Content-Type": "application/x-www-form-urlencoded" },
-  body: body.toString(),
-  cache: "no-store"
-});
-
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: body.toString(),
+        cache: "no-store",
+      });
 
       const json = await res.json();
       if (!json.ok) throw new Error(json.error || "Update failed.");
 
-      // Update local array
-      const idx = students.findIndex(x => Number(x.id) === Number(editId.value));
-      if (idx >= 0) {
-        students[idx] = json.data; // assume API returns updated student row
-      }
-
+      await loadStudents();
       editModal.style.display = "none";
       renderTable();
     } catch (err) {
       console.error(err);
-      alert(err.message);
+      alert(err.message || String(err));
     }
-  };
-}
-}
+  });
 
+  // ───────────── Initial load ─────────────
+  try {
+    await loadStudents();
+    renderTable("Active");
+  } catch (err) {
+    console.error(err);
+    tbody.innerHTML = `<tr><td colspan="5" style="color:red;">Failed to load students.</td></tr>`;
+  }
+}

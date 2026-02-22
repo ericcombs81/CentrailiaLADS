@@ -24,7 +24,8 @@ export function initUsersPage() {
   const editRole = document.getElementById("editRole");
 
   let users = [];
-  let currentSortKey = "id";
+  // ✅ Default sort now that ID column is removed
+  let currentSortKey = "last";
   let currentSortDir = "asc";
 
   function escapeHtml(str) {
@@ -35,10 +36,12 @@ export function initUsersPage() {
 
   function sortRows(rows) {
     const dir = currentSortDir === "asc" ? 1 : -1;
+
     return rows.sort((a, b) => {
       const va = a[currentSortKey];
       const vb = b[currentSortKey];
 
+      // keep this just in case, even though we don't sort by id via UI anymore
       if (currentSortKey === "id") return (Number(va) - Number(vb)) * dir;
 
       const sa = String(va ?? "").toLowerCase();
@@ -61,14 +64,15 @@ export function initUsersPage() {
 
     let rows = sortRows([...users]);
     if (rows.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="7">No users found.</td></tr>`;
+      // ✅ colspan updated (6 columns now)
+      tbody.innerHTML = `<tr><td colspan="6">No users found.</td></tr>`;
       return;
     }
 
     for (const u of rows) {
       const tr = document.createElement("tr");
       tr.innerHTML = `
-        <td>${Number(u.id)}</td>
+        <!-- ✅ ID td removed -->
         <td>${escapeHtml(u.first)}</td>
         <td>${escapeHtml(u.last)}</td>
         <td>${escapeHtml(u.email)}</td>
@@ -239,12 +243,15 @@ export function initUsersPage() {
   (async () => {
     try {
       await loadUsers();
-      const defaultTh = document.querySelector('th.sortable[data-key="id"]');
+
+      // ✅ default sort indicator moved to "last"
+      const defaultTh = document.querySelector('th.sortable[data-key="last"]');
       if (defaultTh) defaultTh.classList.add("asc");
+
       render();
     } catch (err) {
       console.error(err);
-      tbody.innerHTML = `<tr><td colspan="7" style="color:red;">Failed to load users.</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="6" style="color:red;">Failed to load users.</td></tr>`;
     }
   })();
 }
