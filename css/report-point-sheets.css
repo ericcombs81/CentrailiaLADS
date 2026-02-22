@@ -1,0 +1,168 @@
+.rps-page h2 {
+  margin: 0 0 10px 0;
+  color: #cc0100;
+  font-size: 22px;
+  border-bottom: 2px solid #cc0100;
+  display: inline-block;
+  padding-bottom: 4px;
+}
+
+.rps-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 14px;
+  background: #f4f4f4;
+  border-radius: 12px;
+  margin-bottom: 12px;
+}
+
+.rps-tool {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.rps-tool label { font-weight: 900; }
+
+.rps-tool input[type="date"] {
+  padding: 8px 10px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.rps-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.btn-secondary {
+  padding: 8px 14px;
+  border-radius: 10px;
+  font-weight: 900;
+  border: 1px solid #cc0100;
+  background: #fff;
+  color: #cc0100;
+  cursor: pointer;
+}
+
+.btn-secondary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.rps-count {
+  font-weight: 900;
+  color: #333;
+}
+
+/* ✅ Hide the sheets on screen */
+.rps-print-area {
+  display: none;
+}
+
+/* ✅ Print behavior: show only the print area, one sheet per page */
+@media print {
+  body * { visibility: hidden; }
+
+  #rpsPrintArea, #rpsPrintArea * { visibility: visible; }
+
+  #rpsPrintArea {
+    display: block;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+
+  .rps-sheet {
+    page-break-after: always;
+    break-after: page;
+  }
+
+  .rps-sheet:last-child {
+    page-break-after: auto;
+    break-after: auto;
+  }
+
+  /* Student form already looks like your pic #2; remove hover fluff */
+  .student-form {
+    box-shadow: none !important;
+  }
+  .student-form:hover {
+    box-shadow: none !important;
+  }
+}
+
+@media print {
+  /* --- shrink overall vertical footprint a bit --- */
+
+  /* tighten the main card padding */
+  .student-form {
+    padding: 10px 12px !important;
+  }
+
+  /* reduce the big title slightly */
+  .student-form h2 {
+    font-size: 22px !important;
+    margin: 0 0 6px 0 !important;
+    padding-bottom: 4px !important;
+  }
+
+  /* tighten table */
+  .behavior-table table th,
+  .behavior-table table td {
+    padding-top: 6px !important;
+    padding-bottom: 6px !important;
+  }
+
+  /* slightly smaller header row text */
+  .behavior-table thead th {
+    font-size: 12px !important;
+  }
+
+  /* slightly smaller body text (this is often the big win) */
+  .behavior-table tbody td,
+  .behavior-table tbody th,
+  .behavior-table tbody td * {
+    font-size: 12px !important;
+  }
+
+  /* make checkboxes a hair smaller */
+  .behavior-table input[type="checkbox"] {
+    transform: scale(0.9) !important;
+    transform-origin: center !important;
+  }
+
+  /* totals / total percentage spacing */
+  .total-percentage {
+    margin-top: 8px !important;
+    font-size: 14px !important;
+  }
+
+  /* ✅ comments is the thing that spills; make it compact */
+  .form-comments {
+    margin-top: 8px !important;
+  }
+  .form-comments label {
+    margin-bottom: 4px !important;
+    display: inline-block !important;
+  }
+  .form-comments textarea {
+    height: 70px !important;  /* <- key: fixed height */
+    min-height: 70px !important;
+    padding: 8px !important;
+    font-size: 12px !important;
+  }
+
+  /* prevent the comments block from being broken onto a new page */
+  .form-comments {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+}
+
+

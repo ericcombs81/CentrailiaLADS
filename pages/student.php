@@ -3,11 +3,11 @@ require_once "../config/db.php";
 ?>
 
 <link rel="stylesheet" href="css/student.css?v=5">
+
 <div class="student-form">
   <h2>Daily Point Sheet</h2>
 
   <form id="pointForm">
-    <!-- Top section -->
     <div class="form-top">
       <div class="form-group">
         <label for="date">Date:</label>
@@ -21,89 +21,84 @@ require_once "../config/db.php";
         </select>
       </div>
 
-      <!--
-      <div class="form-group small">
-        <label>Present for</label>
-        <input type="number" id="periods" name="periods" min="0" max="9">
-        <span>periods</span>
-      </div>
-
-      <div class="form-group check">
-        <label><input type="checkbox" id="bus"> Rode the Bus</label>
-      </div>
-      <div class="form-group check">
-        <label><input type="checkbox" id="unexcused"> Unexcused</label>
-      </div>
-    </div>
-    -->
-
-    <!-- Behavior table -->
-    <div class="behavior-table">
-      <table>
-        <thead>
-          <tr>
-            <th>Observed Behavior</th>
-            <th>1st</th><th>2nd</th><th>3rd</th><th>4th</th>
-            <th>5th</th><th>6th</th><th>7th</th><th>8th</th>
-            <th>9th</th><th>Bus</th>
-          </tr>
-        </thead>
-        <tbody id="behaviorBody"></tbody>
-      </table>
-    </div>
-
-    <!-- Comments -->
-    <div class="form-comments">
-      <label for="comments">Comments:</label>
-      <textarea id="comments" rows="4"></textarea>
-    </div>
-  </form>
+     <div class="form-group student-search">
+  <label for="studentSearch">Search:</label>
+  <div class="student-search-wrap">
+    <input
+      type="text"
+      id="studentSearch"
+      placeholder="Type a name..."
+      autocomplete="off"
+    >
+    <div id="studentSuggest" class="student-suggest" style="display:none;"></div>
+  </div>
 </div>
 
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-  // Default to today's date in Central Time
-  const now = new Date();
-  const central = new Date(now.toLocaleString('en-US', { timeZone: 'America/Chicago' }));
-  document.getElementById('date').value = central.toISOString().split('T')[0];
 
-  // Behavior list
-  const behaviors = [
-    "Remain in area",
-    "Raise hand to speak",
-    "Verbally appropriate with peers",
-    "Physically appropriate with peers",
-    "Verbally appropriate with staff",
-    "Physically appropriate with staff",
-    "Physically appropriate with objects",
-    "Follow instructions",
-    "Attempt work / pay attention",
-    "Prepared for class / homework"
-  ];
 
-  // Generate rows dynamically with 10 columns of checkboxes (9 periods + Bus)
-  const tbody = document.getElementById("behaviorBody");
+      <!-- ✅ Right-aligned submit button -->
+  <div style="margin-left:auto;">
+    <button class="btn-submit" id="submitDailyPoints" type="button">
+      Submit
+    </button>
+  </div>
+    </div>
 
-  behaviors.forEach((behavior, rowIndex) => {
-    const row = document.createElement("tr");
+    <div class="behavior-table">
+  <table>
+    <thead>
+      <tr>
+        <th>Observed Behavior</th>
+        <th data-period="1" class="period-toggle">1st</th>
+        <th data-period="2" class="period-toggle">2nd</th>
+        <th data-period="3" class="period-toggle">3rd</th>
+        <th data-period="4" class="period-toggle">4th</th>
+        <th data-period="5" class="period-toggle">5th</th>
+        <th data-period="6" class="period-toggle">6th</th>
+        <th data-period="7" class="period-toggle">7th</th>
+        <th data-period="8" class="period-toggle">8th</th>
+        <th data-period="9" class="period-toggle">9th</th>
+        <th data-period="10" class="period-toggle">Bus</th>
+        <th class="total-col">Total %</th>
 
-    const behaviorCell = document.createElement("td");
-    behaviorCell.textContent = behavior;
-    behaviorCell.classList.add("behavior-label");
-    row.appendChild(behaviorCell);
+      </tr>
+    </thead>
+    <tbody id="behaviorBody"></tbody>
 
-    // 10 checkboxes (1–9 periods + bus)
-    for (let i = 1; i <= 10; i++) {
-      const td = document.createElement("td");
-      const checkbox = document.createElement("input");
-      checkbox.type = "checkbox";
-      checkbox.name = `b${rowIndex + 1}_p${i}`;
-      checkbox.classList.add("period-check");
-      td.appendChild(checkbox);
-      row.appendChild(td);
-    }
+    <!-- ✅ Totals row -->
+    <tfoot>
+      <tr class="totals-row">
+        <td class="totals-label"><strong>Total %</strong></td>
+        <td class="total-cell" data-period="1">0%</td>
+        <td class="total-cell" data-period="2">0%</td>
+        <td class="total-cell" data-period="3">0%</td>
+        <td class="total-cell" data-period="4">0%</td>
+        <td class="total-cell" data-period="5">0%</td>
+        <td class="total-cell" data-period="6">0%</td>
+        <td class="total-cell" data-period="7">0%</td>
+        <td class="total-cell" data-period="8">0%</td>
+        <td class="total-cell" data-period="9">0%</td>
+        <td class="total-cell" data-period="10">0%</td>
+        <td class="overall-cell" id="overallTotalCell"></td>
 
-    tbody.appendChild(row);
-  });
-});
-</script>
+
+      </tr>
+    </tfoot>
+  </table>
+</div>
+
+<!-- ✅ Bottom right total percentage -->
+<div class="total-percentage">
+  <strong>Total Percentage:</strong>
+  <span id="overallTotal">0%</span>
+</div>
+
+<div class="form-comments">
+  <label for="comments"><strong>Comments:</strong></label>
+  <textarea id="comments" name="comments" rows="4" placeholder=""></textarea>
+</div>
+
+
+
+<script type="module" src="js/student.js?v=<?= filemtime(__DIR__ . '/../js/student.js') ?>"></script>
+

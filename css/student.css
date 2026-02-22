@@ -1,7 +1,7 @@
 .student-form {
   background: #ffffff;
   border-radius: 12px;
-  padding: 30px 40px;
+  padding: 5px 32px;
   box-shadow: 0 3px 8px rgba(0,0,0,0.08);
   max-width: 1100px;
   margin: 10px auto;
@@ -18,10 +18,10 @@
 
 .student-form h2 {
   color: #cc0100;
-  margin-bottom: 20px;
+  margin-bottom: 12px;
   border-bottom: 2px solid #cc0100;
   display: inline-block;
-  padding-bottom: 6px;
+  padding-bottom: 4px;
 }
 
 /* Top section */
@@ -30,7 +30,7 @@
   flex-wrap: wrap;
   gap: 20px;
   align-items: center;
-  margin-bottom: 25px;
+  margin-bottom: 5px;
 }
 
 .form-group {
@@ -109,11 +109,16 @@
   accent-color: #cc0100;
 }
 
+/* Let the totals-row top border read as the bottom of the table */
+.behavior-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
 /* Comments */
 .form-comments {
   display: block;
   width: 100%;
-  margin-top: 20px;   /* spacing from the table */
+  margin-top: 12px;   /* spacing from the table */
   clear: both;        /* in case anything is floated */
 }
 
@@ -132,4 +137,159 @@
   max-height: 100px;          /* ~10 items depending on line-height */
   overflow-y: auto;
 }
+
+/* Totals row (make it *look* outside the table, but keep alignment) */
+.totals-row td {
+  background: #ffffff;          /* match the form background */
+  font-weight: 700;
+  color: #333;
+
+  border-left: none;
+  border-right: none;
+  border-bottom: none;
+  border-top: 2px solid #cc0100;
+}
+
+.totals-row td.totals-label {
+  text-align: right;
+  padding-right: 12px;
+}
+
+/* Bottom right overall total */
+.total-percentage {
+  text-align: right;
+  margin-top: 10px;
+  font-size: 1.1rem;
+  color: #333;
+}
+
+/* Submit button (match the Student Master "+Enroll New Student" button) */
+.btn-submit {
+  background: #cc0100;
+  color: white;
+  border: none;
+  padding: 8px 18px;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.1s ease;
+}
+
+.btn-submit:hover {
+  background: #e40000;
+  transform: translateY(-2px);
+}
+
+.btn-submit:active {
+  transform: translateY(0px);
+}
+
+.behavior-table th.total-col,
+.behavior-table td.row-total { min-width: 40px; }
+.behavior-table td.row-total { font-weight: 700; }
+
+.student-search { position: relative; }
+
+.student-search-wrap {
+  position: relative;
+  display: inline-block;
+}
+
+#studentSearch {
+  padding: 6px 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 1rem;
+  width: 240px;
+}
+
+.student-suggest {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  width: 100%;
+  max-height: 260px;
+  overflow-y: auto;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  box-shadow: 0 10px 22px rgba(0,0,0,0.12);
+  z-index: 999;
+}
+
+.student-suggest-item {
+  padding: 10px 12px;
+  cursor: pointer;
+  user-select: none;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.student-suggest-item:last-child { border-bottom: none; }
+
+.student-suggest-item:hover,
+.student-suggest-item.active {
+  background: #fff4f4;
+}
+
+.student-suggest-empty {
+  padding: 10px 12px;
+  color: #777;
+}
+
+/* Toast popup */
+.toast {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  background: #2e7d32; /* green success */
+  color: white;
+  padding: 12px 20px;
+  border-radius: 10px;
+  font-weight: 600;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  z-index: 9999;
+  pointer-events: none;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Clickable period headers (2nd through 11th columns) */
+.behavior-table th.period-toggle {
+  cursor: pointer;
+  user-select: none;
+}
+
+.behavior-table th.period-toggle:hover {
+  font-weight: 800; /* slightly bolder on hover */
+}
+
+.behavior-table th[data-period] {
+  cursor: pointer;
+}
+
+.behavior-table th[data-period]:hover {
+  font-weight: 800;
+}
+
+.behavior-table thead th.period-toggle {
+  cursor: pointer;
+}
+
+.behavior-table thead th.period-toggle:hover {
+  font-weight: 800;
+}
+
+
+
+
+
+
+
 

@@ -8,6 +8,10 @@ require_once "config/db.php";
 <title>LADS App</title>
 <link rel="stylesheet" href="css/style.css">
 <link rel="stylesheet" href="css/chart-behavior.css">
+<link rel="stylesheet" href="css/point-sheet-averages.css">
+<link rel="stylesheet" href="css/calendar.css">
+<link rel="stylesheet" href="css/report-point-sheets.css">
+
 
 </head>
 <body>
@@ -15,8 +19,7 @@ require_once "config/db.php";
 <!-- Top thin red line with arc -->
 <div class="header-top">
   <div class="profile">
-    <div class="userName">Eric Combs</div>
-    <img src="pic.jpg" alt="Profile" class="profile-pic">
+    <div class="userName">User Name</div>
   </div>
 </div>
 
@@ -25,7 +28,7 @@ require_once "config/db.php";
 <header class="header-main">
   <img src="logo.png" class="logo" alt="Logo">
   <div class="school-name">
-    <h1>Centralia LADS Tracker</h1>
+    <h1>Centralia Behavior Management Tracker</h1>
   </div>
 </header>
 
@@ -42,7 +45,8 @@ require_once "config/db.php";
         <li><a href="#" data-page="calendar">School Calendar</a></li>
         <li><a href="#" data-page="student-master">Student Master</a></li>
         <li><a href="#" data-page="enrolled-dropped">Students Enrolled / Dropped</a></li>
-        <li><a href="#" data-page="behavior">Behavior</a></li>
+        <li><a href="#" data-page="behavior">Behaviors</a></li>
+        <li><a href="#" data-page="custom-behavior">Customize Behaviors</a></li>
         <li><a href="#" data-page="users">Users</a></li>
       </ul>
     </li>
@@ -51,8 +55,8 @@ require_once "config/db.php";
     <li class="has-dropdown">
       <span class="nav-label">Reports ▾</span>
       <ul class="dropdown">
-        <li><a href="#" data-page="point-averages">Point Sheet Averages</a></li>
-        <li><a href="#" data-page="chart-month">Point Sheet Chart by Month</a></li>
+        <li><a href="#" data-page="report-point-sheets">Daily Point Sheets</a></li>
+        <li><a href="#" data-page="point-sheet-averages">Point Sheet Averages</a></li>
         <li><a href="#" data-page="chart-behavior">Point Sheet Chart by Behavior</a></li>
       </ul>
     </li>

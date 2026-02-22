@@ -62,7 +62,7 @@ table {
 thead {
   position: sticky;
   top: 0;
-  z-index: 20;
+  z-index: 5;
 }
 
 /* Sticky header row */
@@ -75,7 +75,7 @@ thead th {
   font-weight: 600;
   position: static;
   top: 0;
-  z-index: 10;
+  z-index: 5;
 }
 
 /* Sticky LEFT column: ID (1st column) */
@@ -99,7 +99,7 @@ tbody td:nth-child(5) {
 /* Make the header cells that are also sticky sit above everything */
 thead th:nth-child(1),
 thead th:nth-child(5) {
-  z-index: 11;
+  z-index: 5;
   background: #cc0100; /* match your header color */
   color: white;
 }
@@ -115,7 +115,7 @@ tbody td:nth-child(6) {
 
 /* Header cell that is also sticky */
 thead th:nth-child(6) {
-  z-index: 11;
+  z-index: 5;
   background: #cc0100;
   color: white;
 }

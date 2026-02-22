@@ -1,76 +1,58 @@
-export async function initChartByBehaviorPage() {
-  console.log("chart-behavior init");
+export async function initPointSheetAveragesPage() {
+  console.log("point-sheet-averages init");
 
-  // SPA-safe re-init: remove old listeners if revisiting page
-  if (window.__chartBehaviorAbort) {
-    try { window.__chartBehaviorAbort.abort(); } catch (_) {}
+  // SPA-safe re-init
+  if (window.__psaAbort) {
+    try { window.__psaAbort.abort(); } catch (_) {}
   }
   const abort = new AbortController();
-  window.__chartBehaviorAbort = abort;
+  window.__psaAbort = abort;
   const { signal } = abort;
 
   const startDate = document.getElementById("startDate");
   const endDate = document.getElementById("endDate");
-  const svg = document.getElementById("behaviorChart");
+  const studentSel = document.getElementById("studentSelect");
+  const svg = document.getElementById("avgChart");
 
   const metaStudent = document.getElementById("metaStudent");
-  const metaBehavior = document.getElementById("metaBehavior");
   const metaRange = document.getElementById("metaRange");
-
-  const studentSel = document.getElementById("studentSelect");
-  const behaviorSel = document.getElementById("behaviorSelect");
 
   const btnPrint = document.getElementById("btnPrint");
 
-  if (!startDate || !endDate || !svg || !studentSel || !behaviorSel) return;
+  if (!startDate || !endDate || !studentSel || !svg) return;
 
   // Default dates: month-to-date (Central)
   const now = new Date();
   const central = new Date(now.toLocaleString("en-US", { timeZone: "America/Chicago" }));
-  const start = new Date(central.getFullYear(), central.getMonth(), 1);
-  startDate.value = toYMD(start);
+  const monthStart = new Date(central.getFullYear(), central.getMonth(), 1);
+  startDate.value = toYMD(monthStart);
   endDate.value = toYMD(central);
 
-  // Initial UI state
   studentSel.innerHTML = `<option value="">Select student...</option>`;
-  behaviorSel.innerHTML = `<option value="">Select behavior...</option>`;
-  behaviorSel.disabled = true;
 
-  clearChart(svg, "Select a student, then choose a behavior.");
+  clearChart(svg, "Select a student to view averages.");
   updateMeta();
 
-  // Load students
   await loadStudents();
 
-  // --- Debounced auto-render ---
   const rerenderDebounced = debounce(() => {
     if (signal.aborted) return;
-    rerenderChart().catch(err => {
+    rerender().catch(err => {
       if (!signal.aborted) console.error(err);
     });
   }, 250);
 
-  // Events
-  studentSel.addEventListener("change", async () => {
-    await repopulateBehaviors({ keepCurrentIfValid: false });
-    clearChart(svg, behaviorSel.disabled ? "No behaviors assigned in this date range." : "Select a behavior to view chart.");
+  studentSel.addEventListener("change", () => {
     updateMeta();
     rerenderDebounced();
   }, { signal });
 
-  startDate.addEventListener("change", async () => {
-    await repopulateBehaviors({ keepCurrentIfValid: true });
+  startDate.addEventListener("change", () => {
     updateMeta();
     rerenderDebounced();
   }, { signal });
 
-  endDate.addEventListener("change", async () => {
-    await repopulateBehaviors({ keepCurrentIfValid: true });
-    updateMeta();
-    rerenderDebounced();
-  }, { signal });
-
-  behaviorSel.addEventListener("change", () => {
+  endDate.addEventListener("change", () => {
     updateMeta();
     rerenderDebounced();
   }, { signal });
@@ -79,7 +61,6 @@ export async function initChartByBehaviorPage() {
     try {
       await exportReportPreviewToPdf({
         studentText: selectedText(studentSel),
-        behaviorText: selectedText(behaviorSel),
         start: startDate.value,
         end: endDate.value
       });
@@ -89,10 +70,8 @@ export async function initChartByBehaviorPage() {
     }
   }, { signal });
 
-  // ---------- functions ----------
   function updateMeta() {
     if (metaStudent) metaStudent.textContent = selectedText(studentSel) || "—";
-    if (metaBehavior) metaBehavior.textContent = selectedText(behaviorSel) || "—";
     if (metaRange) metaRange.textContent = `${formatUS(startDate.value)} – ${formatUS(endDate.value)}`;
   }
 
@@ -119,84 +98,25 @@ export async function initChartByBehaviorPage() {
     }
   }
 
-  async function repopulateBehaviors({ keepCurrentIfValid }) {
+  async function rerender() {
     const student_id = Number(studentSel.value || 0);
     const s = startDate.value;
     const e = endDate.value;
-
-    const previouslySelected = keepCurrentIfValid ? String(behaviorSel.value || "") : "";
-
-    behaviorSel.innerHTML = `<option value="">Select behavior...</option>`;
-    behaviorSel.disabled = true;
-
-    if (!student_id || !s || !e) return;
-
-    const res = await fetchJson(
-      `api/reports/behavior-options.php?student_id=${encodeURIComponent(student_id)}&start=${encodeURIComponent(s)}&end=${encodeURIComponent(e)}&v=${Date.now()}`
-    );
-
-    const behaviors = (res.data || [])
-      .map(b => ({ id: String(b.behavior_id), text: String(b.behavior_text || "").trim() }))
-      .filter(b => b.id && b.text)
-      .sort((a, b) => a.text.localeCompare(b.text));
-
-    if (behaviors.length === 0) {
-      behaviorSel.innerHTML = `<option value="">No behaviors assigned in range</option>`;
-      behaviorSel.disabled = true;
-      behaviorSel.value = "";
-      return;
-    }
-
-    behaviorSel.innerHTML = `<option value="">Select behavior...</option>`;
-    for (const b of behaviors) {
-      const opt = document.createElement("option");
-      opt.value = b.id;
-      opt.textContent = b.text;
-      behaviorSel.appendChild(opt);
-    }
-
-    behaviorSel.disabled = false;
-
-    // Keep selection if still present
-    if (previouslySelected && behaviors.some(b => b.id === previouslySelected)) {
-      behaviorSel.value = previouslySelected;
-    } else {
-      behaviorSel.value = "";
-    }
-  }
-
-  async function rerenderChart() {
-    const student_id = Number(studentSel.value || 0);
-    const behavior_id = Number(behaviorSel.value || 0);
-    const s = startDate.value;
-    const e = endDate.value;
-
-    updateMeta();
 
     if (!student_id) {
-      clearChart(svg, "Select a student to begin.");
-      return;
-    }
-
-    if (behaviorSel.disabled) {
-      clearChart(svg, "No behaviors assigned in this date range.");
-      return;
-    }
-
-    if (!behavior_id) {
-      clearChart(svg, "Select a behavior to view the chart.");
+      clearChart(svg, "Select a student to view averages.");
       return;
     }
 
     clearChart(svg, "Loading chart...");
 
     const rows = await fetchJson(
-      `api/reports/behavior-series.php?student_id=${encodeURIComponent(student_id)}&behavior_id=${encodeURIComponent(behavior_id)}&start=${encodeURIComponent(s)}&end=${encodeURIComponent(e)}&v=${Date.now()}`
+      `api/reports/point-sheet-averages-series.php?student_id=${encodeURIComponent(student_id)}&start=${encodeURIComponent(s)}&end=${encodeURIComponent(e)}&v=${Date.now()}`
     );
 
     const data = rows.data || [];
     if (!data.length) {
-      clearChart(svg, "No recorded data for that behavior in this date range.");
+      clearChart(svg, "No recorded point sheet data in this date range.");
       return;
     }
 
@@ -254,7 +174,8 @@ function shortMD(ymd) {
 
 function clearChart(svg, msg) {
   while (svg.firstChild) svg.removeChild(svg.firstChild);
-  svg.setAttribute("viewBox", "0 0 680 300");
+  svg.setAttribute("viewBox", "0 0 900 420");
+
 
   const label = document.createElementNS("http://www.w3.org/2000/svg", "text");
   label.setAttribute("x", "340");
@@ -268,6 +189,7 @@ function clearChart(svg, msg) {
 
 /**
  * points: [{xLabel, y}] where y in 0..100
+ * (Only axes + red series; no extra gridlines)
  */
 function renderChart(svg, points) {
   if (!svg || !Array.isArray(points) || points.length < 2) {
@@ -275,25 +197,25 @@ function renderChart(svg, points) {
     return;
   }
 
-  const W = 680, H = 300, L = 40, R = 60, T = 10, B = 28; // R bumped more to keep right side safe
-  svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+  const W = 900, H = 420, L = 50, R = 70, T = 16, B = 40;
+
+  svg.setAttribute("viewBox", "0 0 900 420");
+
   while (svg.firstChild) svg.removeChild(svg.firstChild);
 
-  // Gridlines every 20%
+  // Y labels only (no grid lines)
   for (let yv = 0; yv <= 100; yv += 20) {
     const y = mapY(yv);
-    svg.appendChild(line(L, y, W - R, y, "#eee", 1));
     svg.appendChild(text(10, y + 4, `${yv}`, "#666", "start"));
   }
 
-  // Axes
+  // Axes ONLY
   svg.appendChild(line(L, T, L, H - B, "#999", 1.2));
   svg.appendChild(line(L, H - B, W - R, H - B, "#999", 1.2));
 
   const n = points.length;
   const stepX = (W - L - R) / (n - 1);
 
-  // Limit X labels (avoid crowding)
   const maxLabels = 12;
   const stride = Math.max(1, Math.ceil(n / maxLabels));
 
@@ -303,7 +225,6 @@ function renderChart(svg, points) {
     svg.appendChild(text(x, H - B + 16, points[i].xLabel, "#555", "middle"));
   }
 
-  // Line path
   const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
   const d = points.map((p, i) => `${i === 0 ? "M" : "L"} ${L + i * stepX} ${mapY(p.y)}`).join(" ");
   path.setAttribute("d", d);
@@ -312,7 +233,6 @@ function renderChart(svg, points) {
   path.setAttribute("stroke-width", "2.5");
   svg.appendChild(path);
 
-  // Points
   points.forEach((p, i) => {
     const c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
     c.setAttribute("cx", L + i * stepX);
@@ -350,9 +270,9 @@ function text(x, y, str, color, anchor = "start") {
   return el;
 }
 
-/* ---------------- PDF Export ---------------- */
+/* ---------------- PDF Export (same approach as chart-behavior) ---------------- */
 
-async function exportReportPreviewToPdf({ studentText, behaviorText, start, end }) {
+async function exportReportPreviewToPdf({ studentText, start, end }) {
   const preview = document.querySelector('section.report-preview[aria-label="Report Preview"]');
   if (!preview) throw new Error("Could not find report preview section.");
 
@@ -361,7 +281,6 @@ async function exportReportPreviewToPdf({ studentText, behaviorText, start, end 
   const { jsPDF } = window.jspdf || {};
   if (!html2canvas || !jsPDF) throw new Error("PDF libraries failed to load.");
 
-  // Letter portrait
   const pageW = 612;
   const pageH = 792;
   const marginX = 36;
@@ -374,7 +293,6 @@ async function exportReportPreviewToPdf({ studentText, behaviorText, start, end 
   const ptToPx = 96 / 72;
   const targetCssWidthPx = Math.round(maxWpt * ptToPx);
 
-  // Clone for clean capture
   const clone = preview.cloneNode(true);
   clone.style.position = "fixed";
   clone.style.left = "-10000px";
@@ -386,27 +304,20 @@ async function exportReportPreviewToPdf({ studentText, behaviorText, start, end 
   clone.style.background = "#fff";
   clone.style.zIndex = "999999";
 
-  // ✅ keep content from touching/spilling past the right edge (IMPORTANT)
+  // small right gutter (prevents right-edge chop without huge margin)
   clone.style.boxSizing = "border-box";
-  clone.style.paddingRight = "40px"; // adjust 80–140 if desired
-  clone.style.paddingLeft = "0";
-  clone.style.paddingTop = "0";
-  clone.style.paddingBottom = "0";
+  clone.style.paddingRight = "30px";
 
-  // ✅ also pad the paper itself in case header/legend are inside it
   const paper = clone.querySelector(".paper");
   if (paper) {
     paper.style.boxSizing = "border-box";
-    paper.style.paddingRight = "24px";
+    paper.style.paddingRight = "16px";
     paper.style.overflow = "visible";
     paper.style.boxShadow = "none";
     paper.style.borderRadius = "0";
     paper.style.width = "100%";
     paper.style.maxWidth = "100%";
   }
-
-  const chartWrap = clone.querySelector(".chart-wrap");
-  if (chartWrap) chartWrap.style.overflow = "visible";
 
   document.body.appendChild(clone);
   clone.getBoundingClientRect();
@@ -421,7 +332,6 @@ async function exportReportPreviewToPdf({ studentText, behaviorText, start, end 
 
   const imgData = canvas.toDataURL("image/png");
 
-  // Fit to width inside margins
   const imgPxW = canvas.width;
   const imgPxH = canvas.height;
 
@@ -438,11 +348,11 @@ async function exportReportPreviewToPdf({ studentText, behaviorText, start, end 
   const pdf = new jsPDF({ orientation: "p", unit: "pt", format: "letter" });
   pdf.addImage(imgData, "PNG", x, y, drawW, drawH);
 
-  const filename = makeFilename("BehaviorChart", studentText, behaviorText, start, end);
+  const filename = makeFilename("PointSheetAverages", studentText, start, end);
   pdf.save(filename);
 }
 
-function makeFilename(prefix, student, behavior, start, end) {
+function makeFilename(prefix, student, start, end) {
   const clean = (s) =>
     String(s || "")
       .replace(/[\/\\?%*:|"<>]/g, "-")
@@ -450,7 +360,7 @@ function makeFilename(prefix, student, behavior, start, end) {
       .replace(/_+/g, "_")
       .trim();
 
-  return `${clean(prefix)}_${clean(student)}_${clean(behavior)}_${clean(start)}_${clean(end)}.pdf`;
+  return `${clean(prefix)}_${clean(student)}_${clean(start)}_${clean(end)}.pdf`;
 }
 
 async function ensurePdfLibs() {
@@ -480,4 +390,3 @@ function loadScriptOnce(src, globalNameHint) {
     document.head.appendChild(s);
   });
 }
-
