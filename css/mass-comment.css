@@ -1,0 +1,173 @@
+.mass-comment {
+  background: #fff;
+  border-radius: 12px;
+  padding: 30px 40px;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+  max-width: 1100px;
+  margin: 10px auto;
+  font-family: 'Roboto Condensed', sans-serif;
+}
+
+.header-row h2 {
+  color: #cc0100;
+  border-bottom: 2px solid #cc0100;
+  padding-bottom: 6px;
+  margin: 0 0 16px 0;
+  display: inline-block;
+}
+
+.mass-form {
+  background: #f4f4f4;
+  border-radius: 12px;
+  padding: 16px;
+  display: grid;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 90px 1fr;
+  gap: 10px;
+  align-items: center;
+}
+
+.form-row textarea {
+  width: 100%;
+  resize: vertical;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+}
+
+.form-row input[type="date"] {
+  padding: 8px 10px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.actions {
+  grid-template-columns: 90px auto 1fr;
+}
+
+.btn-primary {
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-weight: 900;
+  border: 1px solid #cc0100;
+  background: #cc0100;
+  color: #fff;
+  cursor: pointer;
+}
+
+.btn-secondary {
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-weight: 900;
+  border: 1px solid #cc0100;
+  background: #fff;
+  color: #cc0100;
+  cursor: pointer;
+}
+
+.btn-edit, .btn-delete {
+  padding: 6px 12px;
+  border-radius: 10px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.btn-edit {
+  background: #fff;
+  border: 1px solid #d6d6d6;
+  color: #cc0100;
+}
+
+.btn-delete {
+  background: #fff4f4;
+  border: 1px solid #e0b4b4;
+  color: #b00000;
+}
+
+.toast {
+  font-weight: 900;
+  color: #1f7a1f;
+  opacity: 0;
+  transition: opacity .2s ease;
+}
+
+.table-wrap {
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.mc-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.mc-table th {
+  background: #cc0100;
+  color: #fff;
+  padding: 10px;
+  border: 1px solid #b00000;
+  text-align: left;
+}
+
+.mc-table td {
+  border: 1px solid #ddd;
+  padding: 10px;
+  background: #fafafa;
+  vertical-align: top;
+}
+
+.mc-table tbody tr:nth-child(even) td { background: #f5f5f5; }
+.center { text-align: center; }
+
+/* Modal */
+.modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.35);
+  z-index: 999;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  background: #fff;
+  border-radius: 12px;
+  padding: 18px;
+  width: 650px;
+  max-width: 92vw;
+  box-shadow: 0 10px 24px rgba(0,0,0,0.2);
+}
+
+.modal-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-head .x {
+  border: none;
+  background: transparent;
+  font-size: 26px;
+  cursor: pointer;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 12px;
+}
+
+@media print {
+  .mass-form, .btn-primary, .btn-secondary, .btn-edit, .btn-delete, .toast { display: none !important; }
+  .mass-comment { box-shadow: none !important; margin: 0 !important; padding: 0 !important; }
+}

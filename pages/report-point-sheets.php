@@ -14,6 +14,7 @@
       <input type="date" id="rpsDate">
     </div>
 
+    <!-- Print lives directly under Date via CSS (column layout) -->
     <div class="rps-actions">
       <button id="rpsPrint" class="btn-secondary" disabled>Print</button>
       <span id="rpsCount" class="rps-count"></span>

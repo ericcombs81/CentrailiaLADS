@@ -22,6 +22,7 @@
   align-items: center;
   gap: 12px;
   margin-bottom: 15px;
+  z-index: 5;
 }
 
 .header-row h2 {
@@ -29,6 +30,7 @@
   border-bottom: 2px solid #cc0100;
   padding-bottom: 6px;
   margin: 0;
+  z-index: 5;
 }
 
 /* Buttons */
@@ -113,12 +115,13 @@ table {
   border-collapse: separate;
   border-spacing: 0;
   min-width: 900px;
+  z-index: 5;
 }
 
 thead {
   position: sticky;
   top: 0;
-  z-index: 20;
+  z-index: 5;
 }
 
 thead th {
@@ -128,6 +131,7 @@ thead th {
   border: 1px solid #b00000;
   text-align: left;
   font-weight: 600;
+  z-index: 5;
 }
 
 td {
@@ -148,7 +152,7 @@ tbody tr:hover td {
 .center { text-align: center; }
 
 /* Sort icons */
-th.sortable { cursor: pointer; position: relative; }
+th.sortable { cursor: pointer; position: relative; z-index: 5;}
 th.sortable::after { content: '⇅'; margin-left: 6px; opacity: 0.8; }
 th.sortable.asc::after { content: '▲'; opacity: 1; }
 th.sortable.desc::after { content: '▼'; opacity: 1; }

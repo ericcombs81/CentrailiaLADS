@@ -2,7 +2,7 @@
 require_once "../config/db.php";
 ?>
 
-<link rel="stylesheet" href="css/behavior.css">
+<link rel="stylesheet" href="css/behavior.css?v=5">
 
 <div class="behavior-page">
   <div class="header-row">

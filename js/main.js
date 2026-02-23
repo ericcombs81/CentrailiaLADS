@@ -47,13 +47,21 @@ document.addEventListener("DOMContentLoaded", () => {
       } else if (page === "point-sheet-averages") {
   const { initPointSheetAveragesPage } = await import(new URL(`./point-sheet-averages.js?v=${v}`, import.meta.url));
   initPointSheetAveragesPage?.();
-} else if (page === "calendar") {
-  const { initCalendarPage } = await import(new URL(`./calendar.js?v=${v}`, import.meta.url));
-  initCalendarPage?.();
+} else if (page === "point-sheet-averages-summary") {
+  const { initPointSheetAveragesSummaryPage } = await import(
+    new URL("./point-sheet-averages-summary.js?v=${v}", import.meta.url)
+  );
+  initPointSheetAveragesSummaryPage?.();
+} else if (page === "mass-comment") {
+  const { initMassCommentPage } = await import(new URL(`./mass-comment.js?v=${v}`, import.meta.url));
+  initMassCommentPage?.();
 } else if (page === "report-point-sheets") {
-  const { initReportPointSheetsPage } = await import(new URL(`./report-point-sheets.js?v=${v}`, import.meta.url));
+  const { initReportPointSheetsPage } = await import(
+    new URL(`./report-point-sheets.js?v=${v}`, import.meta.url)
+  );
   initReportPointSheetsPage?.();
 }
+
 
 
       // Fade-in

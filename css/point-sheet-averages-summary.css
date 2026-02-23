@@ -1,0 +1,294 @@
+/* css/point-sheet-averages-summary.css */
+
+.report-avg-summary {
+  background: #f5f6f8;
+  padding: 24px 30px;
+  font-family: 'Roboto Condensed', Arial, sans-serif;
+}
+
+.report-header h2 {
+  color: #cc0100;
+  margin: 0 0 14px;
+  border-bottom: 2px solid #cc0100;
+  padding-bottom: 6px;
+}
+
+.report-body {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 24px;
+}
+
+/* Controls card */
+.report-controls {
+  background: #fff;
+  border-radius: 12px;
+  padding: 18px;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+  display: grid;
+  gap: 12px;
+  align-content: start;
+}
+
+.control-row {
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  align-items: center;
+  gap: 10px;
+}
+
+.report-controls input[type="date"],
+.report-controls select {
+  padding: 8px 10px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 1rem;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.btn-secondary {
+  background: #fff;
+  color: #cc0100;
+  border: 2px solid #cc0100;
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform .08s ease, background .2s ease;
+}
+.btn-secondary:hover { background: #fff5f5; transform: translateY(-1px); }
+
+/* Preview paper */
+.report-preview { display: grid; }
+.paper {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+  padding: 18px 20px 10px;
+}
+
+.paper-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  padding-bottom: 10px;
+}
+
+.paper-title .paper-school { font-weight: 700; }
+.paper-title .paper-report { font-size: 1.05rem; }
+.paper-meta { text-align: right; font-size: .95rem; }
+.paper-meta strong { font-weight: 700; }
+
+.summary-body {
+  padding: 14px 0 10px;
+}
+
+.summary-table {
+  max-width: 620px;
+}
+
+.summary-header {
+  display: grid;
+  grid-template-columns: 1fr 140px;
+  font-weight: 800;
+  margin-bottom: 6px;
+}
+
+.h-right { text-align: right; }
+
+.summary-rows {
+  display: grid;
+  gap: 6px;
+}
+
+.summary-row {
+  display: grid;
+  grid-template-columns: 1fr 140px;
+  font-size: .98rem;
+}
+
+.summary-row .avg { text-align: right; }
+
+.summary-total {
+  display: grid;
+  grid-template-columns: 1fr 140px;
+  margin-top: 12px;
+  font-weight: 800;
+  align-items: baseline;
+}
+
+.t-label { text-align: right; padding-right: 10px; }
+.t-value { text-align: right; }
+
+.paper-foot {
+  display: flex;
+  justify-content: space-between;
+  border-top: 1px solid #eee;
+  padding-top: 8px;
+  font-size: .95rem;
+}
+
+.legend .dot {
+  display: inline-block;
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: #cc0100;
+  margin-right: 6px;
+}
+
+/* Print */
+@media print {
+  .report-controls { display: none; }
+  .report-avg-summary, .paper { box-shadow: none; }
+  .paper { padding: 0; }
+}
+
+/* ---------------- Summary table readability upgrades ---------------- */
+
+/* Make the summary area feel like a real report table */
+.summary-table {
+  max-width: 720px;              /* a bit wider for long behavior names */
+  margin-top: 6px;
+  border: 1px solid #d9d9d9;
+  border-radius: 10px;
+  overflow: hidden;               /* rounds the zebra stripes cleanly */
+}
+
+/* Header row */
+.summary-header {
+  display: grid;
+  grid-template-columns: 1fr 140px;
+  font-weight: 900;
+  padding: 10px 12px;
+  background: #f2f2f2;
+  border-bottom: 2px solid #cfcfcf;
+}
+
+/* Body rows */
+.summary-rows {
+  display: grid;
+  gap: 0;                         /* remove gaps so borders line up */
+}
+
+.summary-row {
+  display: grid;
+  grid-template-columns: 1fr 140px;
+  padding: 9px 12px;
+  border-bottom: 1px solid #e3e3e3;
+  font-size: 0.98rem;
+  line-height: 1.25;
+}
+
+/* Zebra striping */
+.summary-row:nth-child(odd) {
+  background: #ffffff;
+}
+.summary-row:nth-child(even) {
+  background: #fafafa;
+}
+
+/* Right column alignment + subtle vertical divider */
+.summary-row .avg,
+.summary-header .h-right {
+  text-align: right;
+}
+
+.summary-row .avg,
+.summary-header .h-right {
+  border-left: 1px solid #e3e3e3;
+  padding-left: 12px;
+}
+
+/* Optional: make behavior names slightly bolder for scanning */
+.summary-row > div:first-child {
+  font-weight: 700;
+}
+
+/* Total area: give it its own callout */
+.summary-total {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 2px solid #cc0100;
+}
+
+/* ---------------- Print/PDF friendliness ---------------- */
+
+@media print {
+  /* Make sure backgrounds/borders show in print/PDF */
+  * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Tighten spacing so it fits nicely on a page */
+  .paper {
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    padding: 12px 14px 10px !important;
+  }
+
+  .paper-head {
+    padding-bottom: 8px !important;
+    border-bottom: 1px solid #ddd;
+    margin-bottom: 8px !important;
+  }
+
+  .summary-table {
+    border: 1px solid #000 !important;           /* crisp border on printers */
+  }
+  .summary-header {
+    background: #eaeaea !important;
+    border-bottom: 2px solid #000 !important;
+  }
+  .summary-row {
+    border-bottom: 1px solid #bbb !important;
+  }
+  .summary-row .avg,
+  .summary-header .h-right {
+    border-left: 1px solid #bbb !important;
+  }
+
+  /* Slightly larger text tends to print clearer */
+  .summary-row,
+  .summary-header {
+    font-size: 12.5pt !important;
+  }
+}
+
+/* ---- Align Total Average row with the table columns ---- */
+
+/* ---- Total Average styled to match header ---- */
+
+.summary-total {
+  display: grid;
+  grid-template-columns: 1fr 140px;   /* SAME columns as header/rows */
+  align-items: center;
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-top: 2px solid #cc0100;
+  background: #f2f2f2;                /* match header gray */
+  font-weight: 900;
+}
+
+/* Label aligned with Behaviors column */
+.summary-total .label {
+  text-align: right;
+  padding-right: 12px;
+  color: #111;
+}
+
+/* Value aligned with Average % column */
+.summary-total .value {
+  text-align: right;
+  border-left: 1px solid #d0d0d0;
+  padding-left: 12px;
+  font-size: 1.05rem;
+}

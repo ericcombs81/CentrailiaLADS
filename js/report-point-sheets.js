@@ -30,7 +30,15 @@ export async function initReportPointSheetsPage() {
   }, { signal });
 
   btnPrint.addEventListener("click", () => {
-    window.print();
+    // Hide browser print header title as much as possible
+    const prevTitle = document.title;
+    document.title = "";
+    try {
+      window.print();
+    } finally {
+      // Restore after print dialog closes
+      setTimeout(() => { document.title = prevTitle; }, 0);
+    }
   }, { signal });
 
   await loadForDate(dateEl.value);

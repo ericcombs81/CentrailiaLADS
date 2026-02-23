@@ -10,6 +10,21 @@ try {
   $date = $_GET["date"] ?? "";
   if (!$date) throw new Exception("Missing date");
 
+  // Optional: override the displayed date on the printed sheet (used by student modal date picker)
+  $printDate = trim((string)($_GET["print_date"] ?? ""));
+  if ($printDate === "") $printDate = $date;
+
+  // Optional: comma-separated list of student IDs to render
+  $studentIdsRaw = trim((string)($_GET["student_ids"] ?? ""));
+  $studentIds = [];
+  if ($studentIdsRaw !== "") {
+    foreach (preg_split('/\s*,\s*/', $studentIdsRaw) as $tok) {
+      if ($tok === "") continue;
+      if (ctype_digit($tok)) $studentIds[] = (int)$tok;
+    }
+    $studentIds = array_values(array_unique($studentIds));
+  }
+
   // Get sessions + student name + comments
   $sqlSessions = "
     SELECT
@@ -21,13 +36,32 @@ try {
     FROM behavior_sessions bs
     JOIN student s ON s.ID = bs.student_id
     WHERE bs.session_date = ?
-    ORDER BY s.last, s.first
+      AND s.status = 1
   ";
+
+  if (count($studentIds)) {
+    $placeholders = implode(',', array_fill(0, count($studentIds), '?'));
+    $sqlSessions .= " AND s.ID IN ($placeholders) ";
+  }
+
+  $sqlSessions .= " ORDER BY s.last, s.first ";
 
   $stmt = $conn->prepare($sqlSessions);
   if (!$stmt) throw new Exception("Prepare failed: " . $conn->error);
 
-  $stmt->bind_param("s", $date);
+  if (count($studentIds)) {
+    $types = 's' . str_repeat('i', count($studentIds));
+    $params = array_merge([$date], $studentIds);
+    $bind = [];
+    $bind[] = $types;
+    foreach ($params as $k => $v) {
+      $bind[] = &$params[$k];
+    }
+    call_user_func_array([$stmt, 'bind_param'], $bind);
+  } else {
+    $stmt->bind_param("s", $date);
+  }
+
   if (!$stmt->execute()) throw new Exception("Execute failed: " . $stmt->error);
 
   $res = $stmt->get_result();
@@ -89,7 +123,6 @@ try {
     uasort($behaviors, fn($a, $b) => strcasecmp($a, $b));
 
     // ---- compute totals like student.js ----
-    $behaviorCount = count($behaviors);
     $colTotals = array_fill(1, 10, ["checked" => 0, "total" => 0]);
     $allChecked = 0;
     $allTotal = 0;
@@ -110,21 +143,19 @@ try {
     $overallPct = $allTotal ? round(($allChecked / $allTotal) * 100) : 0;
 
     // ---- Render one sheet using student.php structure/classes ----
-    $out .= "<div class='rps-sheet'>";
-
+    $out .= "<div class='rps-sheet' data-student-id='" . (int)$s["student_id"] . "'>";
     $out .= "<div class='student-form'>";
+
     $out .= "<h2>Daily Point Sheet</h2>";
 
-    // Print-only header row (matches your earlier report header style)
-    $out .= "<div style='display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;'>";
-    $out .= "<div style='font-weight:900;'>Centralia H.S. Annex</div>";
+    // Header (simple, black/white friendly)
+    $out .= "<div style='display:flex;justify-content:flex-end;align-items:flex-start;margin-bottom:8px;'>";
     $out .= "<div style='text-align:right;font-size:12px;line-height:1.35;'>";
     $out .= "<div><strong>Student:</strong> {$studentName}</div>";
-    $out .= "<div><strong>Date:</strong> " . htmlspecialchars($date) . "</div>";
-    $out .= "</div>";
-    $out .= "</div>";
+    $out .= "<div><strong>Date:</strong> " . htmlspecialchars($printDate) . "</div>";
+    $out .= "</div></div>";
 
-    // Table wrapper/class identical to student.php
+    // Table
     $out .= "<div class='behavior-table'>";
     $out .= "<table>";
 
@@ -147,11 +178,11 @@ try {
 
       for ($p = 1; $p <= 10; $p++) {
         $rowTotal++;
-        $checked = !empty($map[$bid][$p]) ? "checked" : "";
-        if ($checked) $rowChecked++;
+        $checkedAttr = !empty($map[$bid][$p]) ? "checked" : "";
+        if ($checkedAttr) $rowChecked++;
 
         $out .= "<td style='text-align:center;'>";
-        $out .= "<input type='checkbox' class='period-check' {$checked} disabled>";
+        $out .= "<input type='checkbox' class='period-check' {$checkedAttr} disabled>";
         $out .= "</td>";
       }
 
@@ -161,7 +192,7 @@ try {
     }
     $out .= "</tbody>";
 
-    // Totals row like student.php tfoot
+    // Totals row
     $out .= "<tfoot><tr class='totals-row'>";
     $out .= "<td class='totals-label'><strong>Total %</strong></td>";
     for ($p = 1; $p <= 10; $p++) {
@@ -174,16 +205,24 @@ try {
     $out .= "</table>";
     $out .= "</div>"; // behavior-table
 
-    // Bottom right overall total percentage like student.php
+    // Overall
     $out .= "<div class='total-percentage'>";
     $out .= "<strong>Total Percentage:</strong> <span>" . $overallPct . "%</span>";
     $out .= "</div>";
 
-    // Comments box like student.php
+    // Comments (taller)
     $out .= "<div class='form-comments'>";
     $out .= "<label><strong>Comments:</strong></label>";
-    $out .= "<textarea rows='4' readonly>" . $comments . "</textarea>";
+    $out .= "<textarea rows='11' readonly>" . $comments . "</textarea>";
     $out .= "</div>";
+
+    // ✅ Parent signature block (OUTSIDE the table so it can’t break layout)
+    $out .= "<div class='signature-block signature-right'>";
+$out .= "  <div class='sig-line'>";
+$out .= "    <span class='sig-label'>Parent/Guardian Signature:</span>";
+$out .= "    <span class='sig-blank'></span>";
+$out .= "  </div>";
+$out .= "</div>";
 
     $out .= "</div>"; // student-form
     $out .= "</div>"; // rps-sheet
@@ -194,5 +233,3 @@ try {
 } catch (Exception $e) {
   echo json_encode(["ok" => false, "error" => $e->getMessage()]);
 }
-
-

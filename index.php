@@ -28,7 +28,7 @@ require_once "config/db.php";
 <header class="header-main">
   <img src="logo.png" class="logo" alt="Logo">
   <div class="school-name">
-    <h1>Centralia Behavior Management Tracker</h1>
+    <h1>Centralia Behavior Management App</h1>
   </div>
 </header>
 
@@ -48,6 +48,7 @@ require_once "config/db.php";
         <li><a href="#" data-page="behavior">Behaviors</a></li>
         <li><a href="#" data-page="custom-behavior">Customize Behaviors</a></li>
         <li><a href="#" data-page="users">Users</a></li>
+        <li><a href="#" data-page="mass-comment">Mass Comment</a></li>
       </ul>
     </li>
 
@@ -57,6 +58,7 @@ require_once "config/db.php";
       <ul class="dropdown">
         <li><a href="#" data-page="report-point-sheets">Daily Point Sheets</a></li>
         <li><a href="#" data-page="point-sheet-averages">Point Sheet Averages</a></li>
+        <li><a href="#" data-page="point-sheet-averages-summary">Point Sheet Averages (All Behaviors)</a><li>
         <li><a href="#" data-page="chart-behavior">Point Sheet Chart by Behavior</a></li>
       </ul>
     </li>

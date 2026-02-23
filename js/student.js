@@ -7,7 +7,6 @@ document.getElementById("pointForm")?.addEventListener("submit", (e) => {
 
 let totalsListenerAttached = false;
 let allActiveStudents = []; // [{id, label, first, last}]
-let periodHeaderTogglesAttached = false;
 let warnedNoStudent = false;
 
 function wireSubmitButton() {
@@ -73,11 +72,11 @@ function attachTotalsListenerOnce() {
       const studentSelect = document.getElementById("student");
       const hasStudent = studentSelect && studentSelect.value !== "";
 
-      // ✅ ALWAYS block checking if no student selected
+      // ALWAYS block checking if no student selected
       if (!hasStudent) {
         e.target.checked = false; // undo every time
 
-        // ✅ Alert only once (remove warnedNoStudent logic if you want it every time)
+        // Alert only once
         if (!warnedNoStudent) {
           warnedNoStudent = true;
           alert("Please select a student before entering points.");
@@ -144,7 +143,7 @@ async function loadActiveStudentsIntoDropdown() {
   sel.innerHTML = `<option value="">Select student...</option>`;
 
   try {
-    const res = await fetch("api/student/list.php", { cache: "no-store" });
+    const res = await fetch("api/student/list.php?v=" + Date.now(), { cache: "no-store" });
     const json = await res.json();
     if (!json.ok) throw new Error(json.error || "Failed to load students");
 
@@ -157,22 +156,21 @@ async function loadActiveStudentsIntoDropdown() {
           id: String(s.id),
           first,
           last,
-          // ✅ Dropdown label: Last, First
           label: `${last}, ${first}`.trim(),
+          // keep grade if your endpoint provides it
+          grade: s.grade ?? s.gradeValue ?? s.grade_level ?? ""
         };
       })
-      // ✅ Sort by Last then First (not by label)
       .sort((a, b) => {
         const lastCmp = a.last.localeCompare(b.last);
         if (lastCmp !== 0) return lastCmp;
         return a.first.localeCompare(b.first);
       });
 
-    // Fill dropdown once (full list)
     allActiveStudents.forEach((s) => {
       const opt = document.createElement("option");
       opt.value = s.id;
-      opt.textContent = s.label; // "Last, First"
+      opt.textContent = s.label;
       sel.appendChild(opt);
     });
   } catch (err) {
@@ -238,7 +236,7 @@ function initStudentTypeahead() {
 
       div.addEventListener("mousedown", (e) => {
         e.preventDefault(); // prevent blur before selection
-        selectStudent(s);   // ✅ selection ONLY on click
+        selectStudent(s);   // selection ONLY on click
       });
 
       suggest.appendChild(div);
@@ -254,14 +252,14 @@ function initStudentTypeahead() {
   }
 
   function selectStudent(s) {
-    // ✅ The ONLY place we update the Student dropdown
+    // The ONLY place we update the Student dropdown
     sel.value = s.id;
     input.value = s.label;
 
-    // Optional: once student is selected, allow alerts again next time
+    // once student is selected, allow alerts again next time
     warnedNoStudent = false;
 
-    // ✅ Trigger your existing autoload logic
+    // Trigger your existing autoload logic
     sel.dispatchEvent(new Event("change", { bubbles: true }));
 
     suggest.style.display = "none";
@@ -271,7 +269,6 @@ function initStudentTypeahead() {
   input.addEventListener("input", refreshMatches);
 
   input.addEventListener("keydown", (e) => {
-    // If dropdown isn't open, allow ArrowDown to open it
     if (suggest.style.display === "none") {
       if (e.key === "ArrowDown") {
         refreshMatches();
@@ -299,7 +296,6 @@ function initStudentTypeahead() {
     if (e.key === "Enter") {
       e.preventDefault();
       if (matches.length === 0) return;
-      // ✅ selection ONLY on Enter
       selectStudent(matches[activeIndex] || matches[0]);
       return;
     }
@@ -314,14 +310,13 @@ function initStudentTypeahead() {
   input.addEventListener("focus", refreshMatches);
 
   input.addEventListener("blur", () => {
-    // delay so mousedown can select first
     setTimeout(() => {
       suggest.style.display = "none";
       suggest.innerHTML = "";
     }, 120);
   });
 
-  // Optional: if user manually changes dropdown, reflect it in the search box
+  // If user manually changes dropdown, reflect it in the search box
   sel.addEventListener("change", () => {
     const chosen = allActiveStudents.find((s) => s.id === sel.value);
     if (chosen) input.value = chosen.label;
@@ -329,7 +324,6 @@ function initStudentTypeahead() {
 }
 
 export async function initStudentPage() {
-  // Make sure we only bind the totals listener once (page can be loaded repeatedly)
   attachTotalsListenerOnce();
   wireSubmitButton();
   attachPeriodHeaderToggleDelegatedOnce();
@@ -372,19 +366,17 @@ export async function initStudentPage() {
     behaviorCell.classList.add("behavior-label");
     row.appendChild(behaviorCell);
 
-    // 10 checkboxes (periods 1–10)
     for (let i = 1; i <= 10; i++) {
       const td = document.createElement("td");
       const checkbox = document.createElement("input");
       checkbox.type = "checkbox";
-      checkbox.name = `b${b.behavior_id}_p${i}`; // maps to DB later
+      checkbox.name = `b${b.behavior_id}_p${i}`;
       checkbox.classList.add("period-check");
 
       td.appendChild(checkbox);
       row.appendChild(td);
     }
 
-    // Row total % (right-most column)
     const rowTotal = document.createElement("td");
     rowTotal.classList.add("row-total");
     rowTotal.textContent = "0%";
@@ -393,10 +385,12 @@ export async function initStudentPage() {
     tbody.appendChild(row);
   });
 
-  // Initialize after render
   wireAutoLoad();
   ensurePeriodHeaderPointers();
   recalcTotals();
+
+  // ✅ Add print wiring at the end so it never blocks student loading
+  wirePrintUIOnce();
 }
 
 async function renderBehaviorTableFor(student_id, session_date) {
@@ -405,7 +399,6 @@ async function renderBehaviorTableFor(student_id, session_date) {
 
   tbody.innerHTML = "";
 
-  // clear comments while switching (optional but feels right)
   const commentsEl = document.getElementById("comments");
   if (commentsEl) commentsEl.value = "";
 
@@ -419,7 +412,6 @@ async function renderBehaviorTableFor(student_id, session_date) {
 
   const behaviors = json.data || [];
 
-  // build rows
   behaviors.forEach((b) => {
     const row = document.createElement("tr");
 
@@ -461,7 +453,6 @@ async function submitPointSheet() {
   if (!student_id) return alert("Select a student first.");
   if (!session_date) return alert("Pick a date first.");
 
-  // Build marks from checkbox names like b{behavior_id}_p{period}
   const checks = document.querySelectorAll("#behaviorBody input.period-check");
   const marks = [];
 
@@ -496,23 +487,23 @@ async function submitPointSheet() {
 }
 
 async function loadPointSheet(student_id, session_date) {
-  const res = await fetch(`api/point-sheet/list.php?student_id=${encodeURIComponent(student_id)}&session_date=${encodeURIComponent(session_date)}&v=${Date.now()}`, { cache: "no-store" });
+  const res = await fetch(
+    `api/point-sheet/list.php?student_id=${encodeURIComponent(student_id)}&session_date=${encodeURIComponent(session_date)}&v=${Date.now()}`,
+    { cache: "no-store" }
+  );
   const json = await res.json();
   if (!json.ok) throw new Error(json.error || "Load failed.");
 
-  // comments
   const commentsEl = document.getElementById("comments");
   if (commentsEl) commentsEl.value = json.comments || "";
 
-  // marks
   const checks = document.querySelectorAll("#behaviorBody input.period-check");
   checks.forEach(cb => {
     const key = cb.name;
     cb.checked = (json.marks && json.marks[key] === 1);
   });
 
-  // If you have totals, call your existing recalcTotals()
-  if (typeof recalcTotals === "function") recalcTotals();
+  recalcTotals();
 }
 
 function wireAutoLoad() {
@@ -525,8 +516,8 @@ function wireAutoLoad() {
     if (!sid || !dt) return;
 
     try {
-      await renderBehaviorTableFor(sid, dt);   // ✅ build correct behaviors first
-      await loadPointSheet(sid, dt);          // ✅ then apply saved checks/comments
+      await renderBehaviorTableFor(sid, dt);
+      await loadPointSheet(sid, dt);
     } catch (err) {
       console.error(err);
     }
@@ -548,15 +539,12 @@ function attachPeriodHeaderToggleDelegatedOnce() {
   if (periodHeaderDelegatedAttached) return;
   periodHeaderDelegatedAttached = true;
 
-  // Single delegated handler so it keeps working even when you navigate away and back
   document.addEventListener("click", (e) => {
     const th = e.target.closest(".behavior-table thead th.period-toggle");
     if (!th) return;
 
-    // Always show pointer cursor on these headers
     th.style.cursor = "pointer";
 
-    // Block toggling if no student selected (same rule as checkboxes)
     const studentSelect = document.getElementById("student");
     const hasStudent = studentSelect && studentSelect.value !== "";
     if (!hasStudent) {
@@ -568,7 +556,7 @@ function attachPeriodHeaderToggleDelegatedOnce() {
       return;
     }
 
-    const period = Number(th.dataset.period || 0); // 1..10
+    const period = Number(th.dataset.period || 0);
     if (!period || period < 1 || period > 10) return;
 
     const boxes = Array.from(
@@ -576,7 +564,6 @@ function attachPeriodHeaderToggleDelegatedOnce() {
     );
     if (boxes.length === 0) return;
 
-    // Toggle: if every box is checked -> clear column, else fill column
     const allChecked = boxes.every((b) => b.checked);
     const newState = !allChecked;
 
@@ -585,5 +572,179 @@ function attachPeriodHeaderToggleDelegatedOnce() {
     });
 
     recalcTotals();
+  });
+}
+
+/* ============================================================
+   PRINT SUPPORT (does NOT interfere with student loading)
+   ============================================================ */
+
+let printUiWired = false;
+
+function openModal() {
+
+  const modalDateEl = document.getElementById("printDate");
+const pageDateEl = document.getElementById("date");
+
+if (modalDateEl && pageDateEl) {
+  modalDateEl.value = pageDateEl.value || "";
+}
+  const modal = document.getElementById("printModal");
+  if (!modal) return;
+  modal.style.display = "flex";
+  modal.setAttribute("aria-hidden", "false");
+}
+
+function closeModal() {
+  const modal = document.getElementById("printModal");
+  if (!modal) return;
+  modal.style.display = "none";
+  modal.setAttribute("aria-hidden", "true");
+}
+
+function escapeHtml(str) {
+  return String(str ?? "").replace(/[&<>"']/g, (m) => ({
+    "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#039;"
+  }[m]));
+}
+
+async function fetchJsonText(url, opts = {}) {
+  const res = await fetch(url, { cache: "no-store", ...opts });
+  const raw = await res.text();
+  let json;
+  try { json = JSON.parse(raw); }
+  catch { throw new Error("Server did not return JSON: " + raw.slice(0, 200)); }
+  if (!json.ok) throw new Error(json.error || "Request failed");
+  return json;
+}
+
+async function loadClassTable() {
+  const tbody = document.getElementById("classPrintBody");
+  if (!tbody) return;
+
+  tbody.innerHTML = `<tr><td colspan="4">Loading...</td></tr>`;
+
+  const json = await fetchJsonText("api/student/list.php?v=" + Date.now());
+
+  const list = (json.data || [])
+    .filter(s => Number(s.statusValue) === 1) // active only
+    .map(s => ({
+      id: String(s.id),
+      last: String(s.last || ""),
+      first: String(s.first || ""),
+      grade: s.grade ?? s.gradeValue ?? s.grade_level ?? ""
+    }))
+    .sort((a,b) => (a.last.localeCompare(b.last) || a.first.localeCompare(b.first)));
+
+  tbody.innerHTML = "";
+  for (const s of list) {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td style="text-align:center;"><input type="checkbox" value="${escapeHtml(s.id)}"></td>
+      <td>${escapeHtml(s.last)}</td>
+      <td>${escapeHtml(s.first)}</td>
+      <td>${escapeHtml(String(s.grade))}</td>
+    `;
+    tbody.appendChild(tr);
+  }
+
+  // Restore saved selection
+  const saved = JSON.parse(localStorage.getItem("teacherClassSelection") || "[]");
+  Array.from(tbody.querySelectorAll('input[type="checkbox"]')).forEach(cb => {
+    cb.checked = saved.includes(String(cb.value));
+  });
+}
+
+function getSelectedClassIds() {
+  const tbody = document.getElementById("classPrintBody");
+  if (!tbody) return [];
+  return Array.from(tbody.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value);
+}
+
+async function printStudentsViaReportRenderer(studentIds) {
+  const dateEl = document.getElementById("date");
+  const ymd = dateEl?.value || "";
+  if (!ymd) return alert("Pick a date first.");
+
+  const printArea = document.getElementById("studentPrintArea");
+  if (!printArea) return alert("Missing #studentPrintArea in student.php");
+
+  const prevTitle = document.title;
+  document.title = "";
+
+  try {
+    const pageDateEl = document.getElementById("date");   // main page date picker
+const modalDateEl = document.getElementById("printDate"); // modal date picker (if present)
+
+const pageDate = pageDateEl?.value || "";
+const printDate = modalDateEl?.value || pageDate;
+
+if (!pageDate) {
+  alert("Please select a date first.");
+  return;
+}
+
+const url =
+  `api/reports/render-point-sheets.php?date=${encodeURIComponent(pageDate)}`
+  + `&print_date=${encodeURIComponent(printDate)}`
+  + `&student_ids=${encodeURIComponent(studentIds.join(","))}`
+  + `&v=${Date.now()}`;
+
+    const json = await fetchJsonText(url);
+    printArea.innerHTML = json.html || "";
+
+    window.print();
+  } catch (err) {
+    console.error(err);
+    alert(err.message);
+  } finally {
+    document.title = prevTitle;
+    setTimeout(() => { printArea.innerHTML = ""; }, 250);
+  }
+}
+
+function wirePrintUIOnce() {
+  if (printUiWired) return;
+  printUiWired = true;
+
+  // Open modal
+  const openBtn = document.getElementById("printDailyPoints");
+  if (openBtn) {
+    openBtn.addEventListener("click", async () => {
+      try { await loadClassTable(); } catch (e) { console.error(e); }
+      openModal();
+    });
+  }
+
+  // Close actions
+  document.getElementById("printModalClose")?.addEventListener("click", closeModal);
+  document.getElementById("printModalCancel")?.addEventListener("click", closeModal);
+
+  document.getElementById("printModal")?.addEventListener("click", (e) => {
+    if (e.target && e.target.id === "printModal") closeModal();
+  });
+
+  // Print This Student
+  document.getElementById("printThisStudentBtn")?.addEventListener("click", async () => {
+    const studentSel = document.getElementById("student");
+    const sid = String(studentSel?.value || "");
+    if (!sid) return alert("Select a student first.");
+    closeModal();
+    await printStudentsViaReportRenderer([sid]);
+  });
+
+  // Save Class Selection
+  document.getElementById("saveClassSelectionBtn")?.addEventListener("click", () => {
+    const ids = getSelectedClassIds();
+    localStorage.setItem("teacherClassSelection", JSON.stringify(ids));
+    showToast("Class selection saved.", 1200);
+  });
+
+  // Print Selected
+  document.getElementById("printClassBtn")?.addEventListener("click", async () => {
+    const ids = getSelectedClassIds();
+    if (!ids.length) return alert("Select at least one student.");
+    closeModal();
+    await printStudentsViaReportRenderer(ids);
   });
 }

@@ -2,7 +2,7 @@
 require_once "../config/db.php";
 ?>
 
-<link rel="stylesheet" href="css/users.css">
+<link rel="stylesheet" href="css/users.css?v=6">
 
 <div class="users-page">
   <div class="header-row">

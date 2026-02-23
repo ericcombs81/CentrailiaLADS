@@ -2,7 +2,7 @@
 require_once "../config/db.php";
 ?>
 
-<link rel="stylesheet" href="css/enrolled-dropped.css?v=2">
+<link rel="stylesheet" href="css/enrolled-dropped.css?v=3">
 
 <div class="enrolled-dropped">
   <div class="header-row">

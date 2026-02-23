@@ -9,8 +9,8 @@
 
 .rps-toolbar {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
+  align-items: flex-start;
   gap: 16px;
   padding: 12px 14px;
   background: #f4f4f4;
@@ -95,6 +95,37 @@
   .student-form:hover {
     box-shadow: none !important;
   }
+
+  /* ✅ Black & white print (save ink) */
+  * {
+    color: #000 !important;
+    background: transparent !important;
+    text-shadow: none !important;
+    box-shadow: none !important;
+  }
+
+  .student-form h2 {
+    border-bottom: 2px solid #000 !important;
+  }
+
+  .behavior-table th {
+    background: #fff !important;
+    color: #000 !important;
+    border: 1px solid #000 !important;
+  }
+
+  .behavior-table td {
+    background: #fff !important;
+    border: 1px solid #000 !important;
+  }
+
+  .behavior-table tbody tr:nth-child(even) td {
+    background: #fff !important;
+  }
+
+  .behavior-table input[type="checkbox"] {
+    accent-color: #000 !important;
+  }
 }
 
 @media print {
@@ -143,7 +174,6 @@
     font-size: 14px !important;
   }
 
-  /* ✅ comments is the thing that spills; make it compact */
   .form-comments {
     margin-top: 8px !important;
   }
@@ -152,8 +182,9 @@
     display: inline-block !important;
   }
   .form-comments textarea {
-    height: 70px !important;  /* <- key: fixed height */
-    min-height: 70px !important;
+    /* +7 lines vs old 4-ish */
+    height: 180px !important;
+    min-height: 180px !important;
     padding: 8px !important;
     font-size: 12px !important;
   }
@@ -165,4 +196,122 @@
   }
 }
 
+@media print {
+  @page { size: letter portrait; margin: 0.5in; }
+
+  .behavior-table table {
+    width: 100% !important;
+    table-layout: fixed !important;
+  }
+  .behavior-table th,
+  .behavior-table td {
+    padding: 4px !important;
+    font-size: 11px !important;
+  }
+  .behavior-table td:first-child {
+    white-space: normal !important;
+    word-break: break-word !important;
+  }
+  .behavior-table input[type="checkbox"] {
+    transform: scale(0.85) !important;
+    transform-origin: center !important;
+  }
+}
+
+/* ============================================================
+   PRINT: FORCE SHEET TO FIT PAGE WIDTH (BLACK & WHITE)
+   ============================================================ */
+@media print {
+  @page { size: letter portrait; margin: 0.5in; }
+
+  .signature-block{
+  margin-top: 16px;
+  font-size: 12px;
+}
+
+.signature-block .sig-line{
+  display:flex;
+  align-items:flex-end;
+  gap:10px;
+  margin-top: 10px;
+}
+
+.signature-block .sig-label{
+  white-space: nowrap;
+  font-weight: 700;
+}
+
+.signature-block .sig-blank{
+  flex: 1;
+  border-bottom: 2px solid #000;
+  height: 16px;
+}
+
+  .behavior-table { overflow: visible !important; }
+
+  .behavior-table table {
+    width: 100% !important;
+    table-layout: fixed !important;
+  }
+
+  .behavior-table th,
+  .behavior-table td {
+    word-wrap: break-word !important;
+    word-break: break-word !important;
+    overflow-wrap: anywhere !important;
+  }
+
+  .behavior-table th:first-child,
+  .behavior-table td:first-child {
+    width: 28% !important;
+    text-align: left !important;
+  }
+
+  /* BLACK & WHITE */
+  .behavior-table th {
+    background: #fff !important;
+    color: #000 !important;
+    border: 2px solid #000 !important;
+  }
+  .behavior-table td {
+    background: #fff !important;
+    color: #000 !important;
+    border: 2px solid #000 !important;
+  }
+
+  .behavior-table input[type="checkbox"] {
+    transform: scale(0.85) !important;
+    accent-color: #000 !important;
+  }
+}
+
+/* Signature block (print-friendly) */
+.signature-block{
+  margin-top: 36px;
+  font-size: 12px;
+}
+
+/* Right-align block and limit width */
+.signature-block.signature-right{
+  width: 50%;
+  margin-left: auto;   /* pushes it right */
+}
+
+.signature-block .sig-line{
+  display:flex;
+  align-items:flex-end;
+  gap:10px;
+  margin-top: 8px;
+}
+
+.signature-block .sig-label{
+  white-space: nowrap;
+  font-weight: 700;
+}
+
+.signature-block .sig-blank{
+  flex: 1;
+  border-bottom: 2px solid #000;
+  height: 16px;
+}
 
