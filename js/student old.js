@@ -68,7 +68,7 @@ function attachTotalsListenerOnce() {
   totalsListenerAttached = true;
 
   document.addEventListener("change", (e) => {
-    if (e.target && e.target.classList && (e.target.classList.contains("period-check") || e.target.classList.contains("attendance-check"))) {
+    if (e.target && e.target.classList && e.target.classList.contains("period-check")) {
       const studentSelect = document.getElementById("student");
       const hasStudent = studentSelect && studentSelect.value !== "";
 
@@ -91,41 +91,14 @@ function attachTotalsListenerOnce() {
 }
 
 function recalcTotals() {
-  // Present periods logic:
-  // A period counts as PRESENT if:
-  //   - Any behavior checkbox in that period is checked, OR
-  //   - "Present (no points this period)" is checked for that period.
-  const present = {};
-  for (let p = 1; p <= 10; p++) present[p] = false;
-
-  // 1) Any checked behavior mark => present
-  for (let p = 1; p <= 10; p++) {
-    const anyChecked = document.querySelector(`#behaviorBody input.period-check[name$="_p${p}"]:checked`) !== null;
-    if (anyChecked) present[p] = true;
-  }
-
-  // 2) Attendance checkboxes => present (even if no marks)
-  document.querySelectorAll(`.attendance-check`).forEach((cb) => {
-    const p = Number(cb.dataset.period || 0);
-    if (p >= 1 && p <= 10 && cb.checked) present[p] = true;
-  });
-
-  const presentPeriods = Object.keys(present).map(Number).filter(p => present[p]);
-  const presentCount = presentPeriods.length;
-
-  const totalBehaviors = document.querySelectorAll("#behaviorBody tr").length;
-
   // ---------- ROW TOTALS (right-side Total % column) ----------
   const rows = document.querySelectorAll("#behaviorBody tr");
   rows.forEach((row) => {
-    // count ONLY periods that are present
-    let checked = 0;
-    presentPeriods.forEach((p) => {
-      const box = row.querySelector(`input.period-check[name$="_p${p}"]`);
-      if (box && box.checked) checked += 1;
-    });
+    const boxes = row.querySelectorAll("input.period-check");
+    const checked = Array.from(boxes).filter((b) => b.checked).length;
+    const total = boxes.length;
 
-    const pct = presentCount === 0 ? 0 : Math.round((checked / presentCount) * 100);
+    const pct = total === 0 ? 0 : Math.round((checked / total) * 100);
 
     const cell = row.querySelector("td.row-total");
     if (cell) cell.textContent = `${pct}%`;
@@ -133,32 +106,27 @@ function recalcTotals() {
 
   // ---------- COLUMN TOTALS (bottom Total % row) ----------
   const totalCells = document.querySelectorAll(".total-cell"); // each has data-period="1..10"
-
   let overallChecked = 0;
+  let overallPossible = 0;
 
   totalCells.forEach((cell) => {
-    const period = Number(cell.dataset.period || 0); // 1..10
-    if (!period || period < 1 || period > 10) return;
+    const period = cell.dataset.period; // "1".."10"
+    if (!period) return;
 
-    const boxes = document.querySelectorAll(`#behaviorBody input.period-check[name$="_p${period}"]`);
+    const boxes = document.querySelectorAll(`input[name$="_p${period}"]`);
     const checked = Array.from(boxes).filter((b) => b.checked).length;
     const total = boxes.length;
-
-    if (!present[period]) {
-      // Not present => excluded from totals
-      cell.textContent = "—";
-      return;
-    }
 
     const percent = total === 0 ? 0 : Math.round((checked / total) * 100);
     cell.textContent = `${percent}%`;
 
     overallChecked += checked;
+    overallPossible += total;
   });
 
   // ---------- OVERALL TOTAL (displayed ONLY under the table) ----------
-  const overallPossible = totalBehaviors * presentCount;
-  const overall = overallPossible === 0 ? 0 : Math.round((overallChecked / overallPossible) * 100);
+  const overall =
+    overallPossible === 0 ? 0 : Math.round((overallChecked / overallPossible) * 100);
 
   const overallText = document.getElementById("overallTotal");
   if (overallText) overallText.textContent = `${overall}%`;
@@ -419,7 +387,6 @@ export async function initStudentPage() {
 
   wireAutoLoad();
   ensurePeriodHeaderPointers();
-  applyAttendanceMask(0);
   recalcTotals();
 
   // ✅ Add print wiring at the end so it never blocks student loading
@@ -434,9 +401,6 @@ async function renderBehaviorTableFor(student_id, session_date) {
 
   const commentsEl = document.getElementById("comments");
   if (commentsEl) commentsEl.value = "";
-
-  // Clear attendance flags for a fresh render
-  applyAttendanceMask(0);
 
   const res = await fetch(
     `api/student-behaviors/list.php?student_id=${encodeURIComponent(student_id)}&date=${encodeURIComponent(session_date)}&v=${Date.now()}`,
@@ -477,29 +441,6 @@ async function renderBehaviorTableFor(student_id, session_date) {
   recalcTotals();
 }
 
-
-function getPresentMaskFromAttendanceChecks() {
-  // Bit 0 = period 1 ... bit 9 = period 10
-  let mask = 0;
-  document.querySelectorAll(".attendance-check").forEach(cb => {
-    const p = Number(cb.dataset.period || 0);
-    if (p >= 1 && p <= 10 && cb.checked) {
-      mask |= (1 << (p - 1));
-    }
-  });
-  return mask >>> 0;
-}
-
-function applyAttendanceMask(mask) {
-  const m = Number(mask || 0);
-  document.querySelectorAll(".attendance-check").forEach(cb => {
-    const p = Number(cb.dataset.period || 0);
-    if (p >= 1 && p <= 10) {
-      cb.checked = ((m >> (p - 1)) & 1) === 1;
-    }
-  });
-}
-
 async function submitPointSheet() {
   const studentSel = document.getElementById("student");
   const dateEl = document.getElementById("date");
@@ -527,9 +468,7 @@ async function submitPointSheet() {
     marks.push({ behavior_id, period, value });
   });
 
-    const present_mask = getPresentMaskFromAttendanceChecks();
-
-  const payload = { student_id, session_date, comments, present_mask, marks };
+  const payload = { student_id, session_date, comments, marks };
 
   const res = await fetch("api/point-sheet/create.php?v=" + Date.now(), {
     method: "POST",
@@ -557,9 +496,6 @@ async function loadPointSheet(student_id, session_date) {
 
   const commentsEl = document.getElementById("comments");
   if (commentsEl) commentsEl.value = json.comments || "";
-
-  // Restore attendance ("present but no points") flags
-  applyAttendanceMask(json.present_mask || 0);
 
   const checks = document.querySelectorAll("#behaviorBody input.period-check");
   checks.forEach(cb => {

@@ -113,6 +113,43 @@
   background: #f5f5f5;
 }
 
+/* ===========================
+   Attendance (Periods Present)
+   =========================== */
+
+/* If you add the attendance row as <tr class="attendance-row"> in <tfoot> */
+.attendance-row td {
+  background: #eef6ff;               /* subtle "control row" color */
+  font-weight: 700;
+  border-top: 2px solid #b7d3f2;     /* separator so it stands out */
+}
+
+/* make the left label read like a note rather than a behavior */
+.attendance-row td:first-child {
+  color: #214a74;
+  font-style: italic;
+}
+
+/* attendance checkboxes: slightly smaller + calmer */
+.attendance-check {
+  transform: scale(0.92);
+  transform-origin: center;
+  opacity: 0.9;
+}
+
+/* optional helper text under the table if you add it */
+.attendance-help {
+  margin-top: 6px;
+  font-size: 12px;
+  font-style: italic;
+  color: #666;
+}
+
+/* Hover friendliness (keep it subtle) */
+.attendance-row:hover td {
+  background: #e7f1ff;
+}
+
 .totals-row td {
   font-weight: 900;
   background: #fff2f2;
@@ -242,151 +279,6 @@
   gap: 10px;
 }
 
-/* ---- Print Styling ---- */
-@media print {
-  body * { visibility: hidden; }
-
-  #studentPrintArea, #studentPrintArea * {
-    visibility: visible;
-  }
-
-  #studentPrintArea {
-    display: block;
-    position: absolute;
-    inset: 0;
-    padding: 0;
-  }
-
-  .student-form {
-    box-shadow: none !important;
-    border-radius: 0 !important;
-    padding: 10px 12px !important;
-  }
-
-  .behavior-table th,
-  .behavior-table td {
-    border: 1px solid #000 !important;
-    background: #fff !important;
-    color: #000 !important;
-  }
-
-  .behavior-table tbody tr:nth-child(even) td {
-    background: #fff !important;
-  }
-
-  .form-comments textarea {
-    min-height: 180px !important; /* ~7 lines taller */
-    height: 180px !important;
-    font-size: 12px !important;
-  }
-
-  * {
-    color: #000 !important;
-    background: transparent !important;
-    box-shadow: none !important;
-  }
-}
-
-@media print {
-  @page { size: letter portrait; margin: 0.5in; }
-
-  .behavior-table table {
-    width: 100% !important;
-    table-layout: fixed !important;
-  }
-  .behavior-table th,
-  .behavior-table td {
-    padding: 4px !important;
-    font-size: 11px !important;
-  }
-  .behavior-table td:first-child {
-    white-space: normal !important;
-    word-break: break-word !important;
-  }
-  .behavior-table input[type="checkbox"] {
-    transform: scale(0.85) !important;
-    transform-origin: center !important;
-  }
-}
-
-/* ============================================================
-   PRINT: FORCE SHEET TO FIT PAGE WIDTH (BLACK & WHITE)
-   ============================================================ */
-@media print {
-  @page { size: letter portrait; margin: 0.5in; }
-
-  /* kill horizontal scrollbars in print */
-  .behavior-table { overflow: visible !important; }
-
-  .signature-block{
-  margin-top: 16px;
-  font-size: 12px;
-}
-
-.signature-block .sig-line{
-  display:flex;
-  align-items:flex-end;
-  gap:10px;
-  margin-top: 10px;
-}
-
-.signature-block .sig-label{
-  white-space: nowrap;
-  font-weight: 700;
-}
-
-.signature-block .sig-blank{
-  flex: 1;
-  border-bottom: 2px solid #000;
-  height: 16px;
-}
-
-  /* force the table to fit the page */
-  .behavior-table table {
-    width: 100% !important;
-    table-layout: fixed !important;
-  }
-
-  /* wrap behavior text instead of stretching the page */
-  .behavior-table th,
-  .behavior-table td {
-    word-wrap: break-word !important;
-    word-break: break-word !important;
-    overflow-wrap: anywhere !important;
-  }
-
-  /* make the first column a sane width; rest divides evenly */
-  .behavior-table th:first-child,
-  .behavior-table td:first-child {
-    width: 28% !important;
-    text-align: left !important;
-  }
-
-  /* BLACK & WHITE output */
-  .behavior-table th {
-    background: #fff !important;
-    color: #000 !important;
-    border: 2px solid #000 !important;
-  }
-  .behavior-table td {
-    background: #fff !important;
-    color: #000 !important;
-    border: 2px solid #000 !important;
-  }
-
-  /* smaller checkbox so columns fit */
-  .behavior-table input[type="checkbox"] {
-    transform: scale(0.85) !important;
-    accent-color: #000 !important;
-  }
-
-  /* comments area taller (you asked for ~7 lines taller) */
-  .form-comments textarea {
-    height: 180px !important;
-    min-height: 180px !important;
-  }
-}
-
 /* Signature block (print-friendly) */
 .signature-block{
   margin-top: 36px;
@@ -499,4 +391,132 @@
 
 #printModal .btn-submit {
   margin-top: 12px;
+}
+
+/* ============================================================
+   PRINT (student.php + rendered point sheets)
+   Updated: FILLED checkboxes, no clipped checkmarks, still 1 page
+   ============================================================ */
+@media print {
+  @page { size: letter portrait; margin: 0.4in; }
+
+  /* show only the print area you generate */
+  body * { visibility: hidden !important; }
+
+  #studentPrintArea,
+  #studentPrintArea * {
+    visibility: visible !important;
+  }
+
+  #studentPrintArea {
+    display: block !important;
+    position: absolute !important;
+    inset: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* remove “web UI” styling */
+  .student-form {
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    padding: 10px 10px !important;
+    margin: 0 !important;
+  }
+
+  /* readable header */
+  .student-form h2 {
+    color: #000 !important;
+    border-bottom: 3px solid #000 !important;
+    font-size: 22px !important;
+    margin: 0 0 8px 0 !important;
+    padding-bottom: 6px !important;
+  }
+
+  /* table: bigger than your current 11px, but still fits */
+  .behavior-table { overflow: visible !important; }
+  .behavior-table table {
+    width: 100% !important;
+    table-layout: fixed !important;
+    border-collapse: collapse !important;
+    min-width: 0 !important;
+  }
+
+  .behavior-table th,
+  .behavior-table td {
+    border: 2px solid #000 !important;
+    background: #fff !important;
+    color: #000 !important;
+    padding: 5px 4px !important;
+    font-size: 12.5px !important;
+    line-height: 1.15 !important;
+  }
+
+  /* first column wraps nicely instead of shrinking everything */
+  .behavior-table th:first-child,
+  .behavior-table td:first-child {
+    width: 34% !important;
+    text-align: left !important;
+    white-space: normal !important;
+    word-break: break-word !important;
+    font-weight: 700 !important;
+  }
+
+  /* keep totals bold */
+  .totals-row td,
+  .row-total,
+  .overall-cell {
+    font-weight: 900 !important;
+  }
+
+  /* ✅ FILLED printable checkboxes (no checkmark glyph) */
+  .behavior-table input[type="checkbox"] {
+    -webkit-appearance: none !important;
+    appearance: none !important;
+    width: 14px !important;
+    height: 14px !important;
+    border: 2px solid #000 !important;
+    border-radius: 2px !important;
+    background: #fff !important;
+    display: inline-block !important;
+    vertical-align: middle !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+
+    /* encourage browsers to actually print fills */
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  .behavior-table input[type="checkbox"]:checked {
+    background: #000 !important;
+  }
+
+  /* comments: keep it readable but not so huge it forces scaling */
+  .form-comments textarea {
+    height: 150px !important;
+    min-height: 150px !important;
+    font-size: 12px !important;
+    border: 2px solid #000 !important;
+    padding: 8px !important;
+    background: #fff !important;
+  }
+
+  /* signature: keep clean */
+  .signature-block.signature-right {
+    width: 55% !important;
+    margin-left: auto !important;
+    margin-top: 18px !important;
+    font-size: 12px !important;
+  }
+  .signature-block .sig-blank {
+    border-bottom: 2px solid #000 !important;
+  }
+
+  /* ✅ print: black text, no shadows (BUT don't nuke backgrounds globally) */
+  * {
+    color: #000 !important;
+    text-shadow: none !important;
+    box-shadow: none !important;
+  }
 }

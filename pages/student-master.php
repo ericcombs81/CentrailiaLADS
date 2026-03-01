@@ -2,7 +2,7 @@
 require_once "../config/db.php";
 ?>
 
-<link rel="stylesheet" href="css/student-master.css?v=6">
+<link rel="stylesheet" href="css/student-master.css?v=10">
 
 <div class="student-master">
   <div class="header-row">
@@ -15,24 +15,28 @@ require_once "../config/db.php";
   </div>
 </div>
 
-  <div class="table-container">
-    <table>
-      <thead>
-  <tr>
-    <th class="sortable" data-key="last">Last Name</th>
-    <th class="sortable" data-key="first">First Name</th>
-    <th class="sortable" data-key="grade">Grade</th>
-    <th>
-      Status
-      <select id="statusFilter">
-        <option value="all">All</option>
-        <option value="Active" selected>Active</option>
-        <option value="Inactive">Inactive</option>
-      </select>
-    </th>
-    <th>Action</th>
-  </tr>
-</thead>
+<div class="student-table-wrap">
+  <table class="student-table">
+    <thead>
+      <tr>
+        <th class="sortable" data-key="last">Last Name</th>
+        <th class="sortable" data-key="first">First Name</th>
+        <th class="sortable" data-key="grade">Grade</th>
+        <th>
+          Status
+          <select id="statusFilter">
+            <option value="all">All</option>
+            <option value="Active" selected>Active</option>
+            <option value="Inactive">Inactive</option>
+          </select>
+        </th>
+        <th>Action</th>
+      </tr>
+    </thead>
+
+    <tbody id="studentTableBody"></tbody>
+  </table>
+</div>
 
 
       <tbody id="studentTableBody"></tbody>

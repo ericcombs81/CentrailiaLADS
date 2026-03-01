@@ -62,25 +62,6 @@ require_once "../config/db.php";
         <tbody id="behaviorBody"></tbody>
 
         <tfoot>
-          <tr class="attendance-row">
-            <td class="totals-label">
-              <strong>Present (no points this period)</strong>
-              <div style="font-weight:400; font-size:0.85em; opacity:0.85; margin-top:4px;">
-                Check only if the student was present but earned <em>no</em> points that period.
-              </div>
-            </td>
-            <td style="text-align:center;"><input type="checkbox" class="attendance-check" data-period="1" aria-label="Present no points period 1"></td>
-            <td style="text-align:center;"><input type="checkbox" class="attendance-check" data-period="2" aria-label="Present no points period 2"></td>
-            <td style="text-align:center;"><input type="checkbox" class="attendance-check" data-period="3" aria-label="Present no points period 3"></td>
-            <td style="text-align:center;"><input type="checkbox" class="attendance-check" data-period="4" aria-label="Present no points period 4"></td>
-            <td style="text-align:center;"><input type="checkbox" class="attendance-check" data-period="5" aria-label="Present no points period 5"></td>
-            <td style="text-align:center;"><input type="checkbox" class="attendance-check" data-period="6" aria-label="Present no points period 6"></td>
-            <td style="text-align:center;"><input type="checkbox" class="attendance-check" data-period="7" aria-label="Present no points period 7"></td>
-            <td style="text-align:center;"><input type="checkbox" class="attendance-check" data-period="8" aria-label="Present no points period 8"></td>
-            <td style="text-align:center;"><input type="checkbox" class="attendance-check" data-period="9" aria-label="Present no points period 9"></td>
-            <td style="text-align:center;"><input type="checkbox" class="attendance-check" data-period="10" aria-label="Present no points period 10"></td>
-            <td class="overall-cell"></td>
-          </tr>
           <tr class="totals-row">
             <td class="totals-label"><strong>Total %</strong></td>
             <td class="total-cell" data-period="1">0%</td>

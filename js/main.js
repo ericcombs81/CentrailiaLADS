@@ -60,7 +60,9 @@ document.addEventListener("DOMContentLoaded", () => {
     new URL(`./report-point-sheets.js?v=${v}`, import.meta.url)
   );
   initReportPointSheetsPage?.();
-}
+} else if (page === "calendar") {
+  const { initCalendarPage } = await import(new URL(`./calendar.js?v=${v}`, import.meta.url));
+  initCalendarPage?.(); }
 
 
 

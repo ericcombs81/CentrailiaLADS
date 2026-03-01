@@ -64,226 +64,7 @@
   display: none;
 }
 
-/* ✅ Print behavior: show only the print area, one sheet per page */
-@media print {
-  body * { visibility: hidden; }
 
-  #rpsPrintArea, #rpsPrintArea * { visibility: visible; }
-
-  #rpsPrintArea {
-    display: block;
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-  }
-
-  .rps-sheet {
-    page-break-after: always;
-    break-after: page;
-  }
-
-  .rps-sheet:last-child {
-    page-break-after: auto;
-    break-after: auto;
-  }
-
-  /* Student form already looks like your pic #2; remove hover fluff */
-  .student-form {
-    box-shadow: none !important;
-  }
-  .student-form:hover {
-    box-shadow: none !important;
-  }
-
-  /* ✅ Black & white print (save ink) */
-  * {
-    color: #000 !important;
-    background: transparent !important;
-    text-shadow: none !important;
-    box-shadow: none !important;
-  }
-
-  .student-form h2 {
-    border-bottom: 2px solid #000 !important;
-  }
-
-  .behavior-table th {
-    background: #fff !important;
-    color: #000 !important;
-    border: 1px solid #000 !important;
-  }
-
-  .behavior-table td {
-    background: #fff !important;
-    border: 1px solid #000 !important;
-  }
-
-  .behavior-table tbody tr:nth-child(even) td {
-    background: #fff !important;
-  }
-
-  .behavior-table input[type="checkbox"] {
-    accent-color: #000 !important;
-  }
-}
-
-@media print {
-  /* --- shrink overall vertical footprint a bit --- */
-
-  /* tighten the main card padding */
-  .student-form {
-    padding: 10px 12px !important;
-  }
-
-  /* reduce the big title slightly */
-  .student-form h2 {
-    font-size: 22px !important;
-    margin: 0 0 6px 0 !important;
-    padding-bottom: 4px !important;
-  }
-
-  /* tighten table */
-  .behavior-table table th,
-  .behavior-table table td {
-    padding-top: 6px !important;
-    padding-bottom: 6px !important;
-  }
-
-  /* slightly smaller header row text */
-  .behavior-table thead th {
-    font-size: 12px !important;
-  }
-
-  /* slightly smaller body text (this is often the big win) */
-  .behavior-table tbody td,
-  .behavior-table tbody th,
-  .behavior-table tbody td * {
-    font-size: 12px !important;
-  }
-
-  /* make checkboxes a hair smaller */
-  .behavior-table input[type="checkbox"] {
-    transform: scale(0.9) !important;
-    transform-origin: center !important;
-  }
-
-  /* totals / total percentage spacing */
-  .total-percentage {
-    margin-top: 8px !important;
-    font-size: 14px !important;
-  }
-
-  .form-comments {
-    margin-top: 8px !important;
-  }
-  .form-comments label {
-    margin-bottom: 4px !important;
-    display: inline-block !important;
-  }
-  .form-comments textarea {
-    /* +7 lines vs old 4-ish */
-    height: 180px !important;
-    min-height: 180px !important;
-    padding: 8px !important;
-    font-size: 12px !important;
-  }
-
-  /* prevent the comments block from being broken onto a new page */
-  .form-comments {
-    break-inside: avoid !important;
-    page-break-inside: avoid !important;
-  }
-}
-
-@media print {
-  @page { size: letter portrait; margin: 0.5in; }
-
-  .behavior-table table {
-    width: 100% !important;
-    table-layout: fixed !important;
-  }
-  .behavior-table th,
-  .behavior-table td {
-    padding: 4px !important;
-    font-size: 11px !important;
-  }
-  .behavior-table td:first-child {
-    white-space: normal !important;
-    word-break: break-word !important;
-  }
-  .behavior-table input[type="checkbox"] {
-    transform: scale(0.85) !important;
-    transform-origin: center !important;
-  }
-}
-
-/* ============================================================
-   PRINT: FORCE SHEET TO FIT PAGE WIDTH (BLACK & WHITE)
-   ============================================================ */
-@media print {
-  @page { size: letter portrait; margin: 0.5in; }
-
-  .signature-block{
-  margin-top: 16px;
-  font-size: 12px;
-}
-
-.signature-block .sig-line{
-  display:flex;
-  align-items:flex-end;
-  gap:10px;
-  margin-top: 10px;
-}
-
-.signature-block .sig-label{
-  white-space: nowrap;
-  font-weight: 700;
-}
-
-.signature-block .sig-blank{
-  flex: 1;
-  border-bottom: 2px solid #000;
-  height: 16px;
-}
-
-  .behavior-table { overflow: visible !important; }
-
-  .behavior-table table {
-    width: 100% !important;
-    table-layout: fixed !important;
-  }
-
-  .behavior-table th,
-  .behavior-table td {
-    word-wrap: break-word !important;
-    word-break: break-word !important;
-    overflow-wrap: anywhere !important;
-  }
-
-  .behavior-table th:first-child,
-  .behavior-table td:first-child {
-    width: 28% !important;
-    text-align: left !important;
-  }
-
-  /* BLACK & WHITE */
-  .behavior-table th {
-    background: #fff !important;
-    color: #000 !important;
-    border: 2px solid #000 !important;
-  }
-  .behavior-table td {
-    background: #fff !important;
-    color: #000 !important;
-    border: 2px solid #000 !important;
-  }
-
-  .behavior-table input[type="checkbox"] {
-    transform: scale(0.85) !important;
-    accent-color: #000 !important;
-  }
-}
 
 /* Signature block (print-friendly) */
 .signature-block{
@@ -313,5 +94,78 @@
   flex: 1;
   border-bottom: 2px solid #000;
   height: 16px;
+}
+
+@media print {
+  @page { size: letter portrait; margin: 0.4in; }
+
+  /* ✅ Hide EVERYTHING by default */
+  body * {
+    visibility: hidden !important;
+  }
+
+  /* ✅ Only show the generated print content */
+  #rpsPrintArea,
+  #rpsPrintArea * {
+    visibility: visible !important;
+  }
+
+  /* If your page sometimes uses this wrapper instead */
+  .rps-print-area,
+  .rps-print-area * {
+    visibility: visible !important;
+  }
+
+  /* ✅ Force the print area to start at the very top-left */
+  #rpsPrintArea,
+  .rps-print-area {
+    display: block !important;
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+  }
+
+  /* One sheet per page */
+  .rps-sheet {
+    page-break-after: always;
+    break-after: page;
+  }
+  .rps-sheet:last-child {
+    page-break-after: auto;
+    break-after: auto;
+  }
+
+  /* Black/white table */
+  .behavior-table th,
+  .behavior-table td {
+    background: #fff !important;
+    border: 2px solid #000 !important;
+    color: #000 !important;
+  }
+
+  /* ✅ Filled checkboxes */
+  #rpsPrintArea input[type="checkbox"],
+  .rps-print-area input[type="checkbox"] {
+    -webkit-appearance: none !important;
+    appearance: none !important;
+    width: 14px !important;
+    height: 14px !important;
+    border: 2px solid #000 !important;
+    border-radius: 2px !important;
+    background: #fff !important;
+    display: inline-block !important;
+    vertical-align: middle !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  #rpsPrintArea input[type="checkbox"]:checked,
+  .rps-print-area input[type="checkbox"]:checked {
+    background: #000 !important;
+  }
 }
 

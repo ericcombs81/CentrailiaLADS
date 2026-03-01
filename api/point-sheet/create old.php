@@ -14,7 +14,6 @@ if (!is_array($input)) {
 $student_id   = (int)($input["student_id"] ?? 0);
 $session_date = trim($input["session_date"] ?? "");
 $comments     = $input["comments"] ?? "";
-$present_mask = (int)($input["present_mask"] ?? 0);
 $marks        = $input["marks"] ?? [];
 
 if ($student_id <= 0 || $session_date === "") {
@@ -24,9 +23,6 @@ if ($student_id <= 0 || $session_date === "") {
 }
 
 if (!is_array($marks)) $marks = [];
-
-// Clamp to 10 bits (periods 1..10)
-$present_mask = $present_mask & 1023;
 
 $conn->begin_transaction();
 
@@ -43,16 +39,16 @@ try {
   $stmt->close();
 
   if ($session_id === null) {
-    $stmt = $conn->prepare("INSERT INTO behavior_sessions (student_id, session_date, comments, present_mask) VALUES (?, ?, ?, ?)");
+    $stmt = $conn->prepare("INSERT INTO behavior_sessions (student_id, session_date, comments) VALUES (?, ?, ?)");
     if (!$stmt) throw new Exception($conn->error);
-    $stmt->bind_param("issi", $student_id, $session_date, $comments, $present_mask);
+    $stmt->bind_param("iss", $student_id, $session_date, $comments);
     if (!$stmt->execute()) throw new Exception($stmt->error);
     $session_id = (int)$conn->insert_id;
     $stmt->close();
   } else {
-    $stmt = $conn->prepare("UPDATE behavior_sessions SET comments=?, present_mask=? WHERE session_id=?");
+    $stmt = $conn->prepare("UPDATE behavior_sessions SET comments=? WHERE session_id=?");
     if (!$stmt) throw new Exception($conn->error);
-    $stmt->bind_param("sii", $comments, $present_mask, $session_id);
+    $stmt->bind_param("si", $comments, $session_id);
     if (!$stmt->execute()) throw new Exception($stmt->error);
     $stmt->close();
   }
