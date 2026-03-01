@@ -712,11 +712,39 @@ async function loadClassTable() {
     tbody.appendChild(tr);
   }
 
-  // Restore saved selection
-  const saved = JSON.parse(localStorage.getItem("teacherClassSelection") || "[]");
-  Array.from(tbody.querySelectorAll('input[type="checkbox"]')).forEach(cb => {
-    cb.checked = saved.includes(String(cb.value));
-  });
+// Restore saved selection (server-first, localStorage fallback PER USER)
+let saved = [];
+let userKey = "teacherClassSelection"; // fallback key (legacy)
+
+try {
+  const sel = await fetchJsonText("api/student/class-selection-get.php?v=" + Date.now());
+  const uid = sel.user_id ? String(sel.user_id) : "";
+  userKey = uid ? `teacherClassSelection_u${uid}` : userKey;
+
+  const serverIds = (sel.data && Array.isArray(sel.data.student_ids)) ? sel.data.student_ids : [];
+  const serverHasRow = !!(sel.data && sel.data.updated_at); // null means no DB row
+
+  if (serverHasRow) {
+    saved = serverIds;
+    // Optional: keep local cache in sync (per-user)
+    localStorage.setItem(userKey, JSON.stringify(saved));
+    // Optional: remove legacy key so it doesn't leak between accounts
+    localStorage.removeItem("teacherClassSelection");
+  } else {
+    // no DB row yet -> use LOCAL fallback for THIS user only
+    try { saved = JSON.parse(localStorage.getItem(userKey) || "[]"); }
+    catch { saved = []; }
+  }
+} catch (e) {
+  // server failed -> use LOCAL fallback for THIS user only (or legacy if we don't know uid)
+  try { saved = JSON.parse(localStorage.getItem(userKey) || "[]"); }
+  catch { saved = []; }
+}
+
+Array.from(tbody.querySelectorAll('input[type="checkbox"]')).forEach(cb => {
+  cb.checked = saved.includes(String(cb.value));
+});
+
 }
 
 function getSelectedClassIds() {
@@ -797,12 +825,38 @@ function wirePrintUIOnce() {
     await printStudentsViaReportRenderer([sid]);
   });
 
-  // Save Class Selection
-  document.getElementById("saveClassSelectionBtn")?.addEventListener("click", () => {
-    const ids = getSelectedClassIds();
-    localStorage.setItem("teacherClassSelection", JSON.stringify(ids));
+  // Save Class Selection (server + per-user localStorage)
+document.getElementById("saveClassSelectionBtn")?.addEventListener("click", async () => {
+  const ids = getSelectedClassIds();
+
+  try {
+    const res = await fetch("api/student/class-selection-save.php?v=" + Date.now(), {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ student_ids: ids }),
+      cache: "no-store"
+    });
+
+    const raw = await res.text();
+    let json;
+    try { json = JSON.parse(raw); }
+    catch { throw new Error("Non-JSON response: " + raw.slice(0, 200)); }
+
+    if (!json.ok) throw new Error(json.error || "Save failed");
+
+    const uid = json.user_id ? String(json.user_id) : "";
+    const userKey = uid ? `teacherClassSelection_u${uid}` : "teacherClassSelection";
+
+    // Keep a per-user local backup (no cross-user leakage)
+    localStorage.setItem(userKey, JSON.stringify(ids));
+    localStorage.removeItem("teacherClassSelection"); // kill legacy key
+
     showToast("Class selection saved.", 1200);
-  });
+  } catch (err) {
+    console.error(err);
+    alert("Server save failed:\n\n" + (err?.message || err));
+  }
+});
 
   // Print Selected
   document.getElementById("printClassBtn")?.addEventListener("click", async () => {
