@@ -178,6 +178,60 @@ th.sortable.desc::after { content: '▼'; opacity: 1; }
   position: relative;
 }
 
+/* Edit modal: two-column layout (actions left, form right) */
+.edit-modal-layout {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  gap: 18px;
+  align-items: start;
+  margin-top: 10px;
+}
+
+.edit-actions {
+  border-right: 1px solid #eee;
+  padding-right: 16px;
+}
+
+.btn-reset {
+  width: 100%;
+  background: #fff;
+  color: #cc0100;
+  border: 1px solid #cc0100;
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: background .2s ease, transform .08s ease;
+}
+
+.btn-reset:hover {
+  background: #fff4f4;
+  transform: translateY(-1px);
+}
+
+.btn-reset:active {
+  transform: translateY(0px);
+}
+
+.edit-actions-note {
+  margin-top: 10px;
+  font-size: 0.95rem;
+  line-height: 1.25;
+  opacity: 0.85;
+}
+
+@media (max-width: 700px) {
+  .edit-modal-layout {
+    grid-template-columns: 1fr;
+  }
+  .edit-actions {
+    border-right: none;
+    padding-right: 0;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 12px;
+  }
+}
+
 .close-btn {
   position: absolute;
   top: 10px;

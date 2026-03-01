@@ -1,4 +1,7 @@
 <?php
+require_once __DIR__ . "/../auth.php";
+require_login();
+require_admin();
 require_once "../config/db.php";
 ?>
 
@@ -63,28 +66,39 @@ require_once "../config/db.php";
       <span class="close-btn" id="editUserCloseBtn">&times;</span>
       <h3>Edit User</h3>
 
-      <form id="editUserForm">
-        <input type="hidden" id="editId">
-
-        <div class="form-grid">
-          <label for="editFirst">First Name:</label>
-          <input type="text" id="editFirst" required>
-
-          <label for="editLast">Last Name:</label>
-          <input type="text" id="editLast" required>
-
-          <label for="editEmail">Email:</label>
-          <input type="email" id="editEmail" required>
-
-          <label for="editRole">Role:</label>
-          <select id="editRole" required>
-            <option value="Teacher">Teacher</option>
-            <option value="Admin">Admin</option>
-          </select>
+      <div class="edit-modal-layout">
+        <!-- Left actions column -->
+        <div class="edit-actions">
+          <button type="button" class="btn-reset" id="resetPasswordBtn">Reset Password</button>
+          <div class="edit-actions-note">
+            Resets the user password to <b>Centralia</b> and forces them to change it on next login.
+          </div>
         </div>
 
-        <button type="submit" class="btn-submit">Save Changes</button>
-      </form>
+        <!-- Right form column -->
+        <form id="editUserForm" class="edit-form">
+          <input type="hidden" id="editId">
+
+          <div class="form-grid">
+            <label for="editFirst">First Name:</label>
+            <input type="text" id="editFirst" required>
+
+            <label for="editLast">Last Name:</label>
+            <input type="text" id="editLast" required>
+
+            <label for="editEmail">Email:</label>
+            <input type="email" id="editEmail" required>
+
+            <label for="editRole">Role:</label>
+            <select id="editRole" required>
+              <option value="Teacher">Teacher</option>
+              <option value="Admin">Admin</option>
+            </select>
+          </div>
+
+          <button type="submit" class="btn-submit">Save Changes</button>
+        </form>
+      </div>
     </div>
   </div>
 </div>

@@ -1,4 +1,7 @@
 <?php
+require_once __DIR__ . "/../_guard.php";
+api_require_login();
+api_require_admin();
 require_once __DIR__ . "/../../config/db.php";
 header("Content-Type: application/json; charset=utf-8");
 
@@ -15,17 +18,22 @@ if ($first === "" || $last === "" || $email === "") {
 
 if ($role !== "Teacher" && $role !== "Admin") $role = "Teacher";
 
-// Generate temp password (8 chars)
-$alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789";
-$tempPassword = "";
-for ($i = 0; $i < 8; $i++) {
-  $tempPassword .= $alphabet[random_int(0, strlen($alphabet) - 1)];
-}
-
-// One-way hash (safe)
+// Temporary password policy:
+// - All new users start with the same temporary password ("Centralia")
+// - They MUST change it on first login (requires users.must_change_password column)
+$tempPassword = "Centralia";
 $hash = password_hash($tempPassword, PASSWORD_DEFAULT);
 
-$stmt = $conn->prepare("INSERT INTO users (email, first, last, password_hash, role) VALUES (?, ?, ?, ?, ?)");
+// If your DB does not yet have must_change_password, add it:
+// ALTER TABLE users ADD COLUMN must_change_password TINYINT(1) NOT NULL DEFAULT 0;
+$hasMustChange = false;
+if ($colsRes = $conn->query("SHOW COLUMNS FROM users LIKE 'must_change_password'")) {
+  $hasMustChange = ($colsRes->num_rows > 0);
+}
+
+$stmt = $hasMustChange
+  ? $conn->prepare("INSERT INTO users (email, first, last, password_hash, role, must_change_password) VALUES (?, ?, ?, ?, ?, 1)")
+  : $conn->prepare("INSERT INTO users (email, first, last, password_hash, role) VALUES (?, ?, ?, ?, ?)");
 if (!$stmt) {
   http_response_code(500);
   echo json_encode(["ok" => false, "error" => $conn->error]);
@@ -51,5 +59,6 @@ echo json_encode([
     "last" => $last,
     "role" => $role
   ],
-  "tempPassword" => $tempPassword
+  "tempPassword" => $tempPassword,
+  "mustChange" => $hasMustChange ? 1 : 0
 ]);

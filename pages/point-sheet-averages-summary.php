@@ -1,4 +1,7 @@
 <?php
+require_once __DIR__ . "/../auth.php";
+require_login();
+require_admin();
 // pages/point-sheet-averages-summary.php
 ?>
 <link rel="stylesheet" href="css/point-sheet-averages-summary.css?v=<?= filemtime(__DIR__ . '/../css/point-sheet-averages-summary.css') ?>">

@@ -20,7 +20,7 @@ body {
   position: absolute;
   right: 0;
   top: 0;
-  width: 300px;
+  width: 220px;
   height: 60px;
   background: #cc0100;
   border-bottom-left-radius: 100px 100%;
@@ -30,12 +30,16 @@ body {
 /* ───────────── Profile (name + picture) inside red arc ───────────── */
 .profile {
   position: absolute;
-  right: 30px;
-  top: 4px;
-  z-index: 522;
+  top: 0;
+  right: 0;
+  height: 60px;           /* match arc height */
+  width: 200px;           /* match arc width */
+
   display: flex;
   align-items: center;
-  gap: 30px;
+  justify-content: center;
+
+  z-index: 522;
 }
 
 /* Match nav bar typography for name */
@@ -46,7 +50,7 @@ body {
   letter-spacing: 0.3px;
   font-size: 1.1rem;
   text-transform: uppercase;
-  margin-top: 2px; /* slight nudge for perfect vertical alignment */
+  margin: 0px; /* slight nudge for perfect vertical alignment */
 }
 
 
@@ -207,7 +211,9 @@ body {
 }
 
 /* ───────────── Non-clickable dropdown headers (Admin / Reports) ───────────── */
+/* ───────────── Non-clickable dropdown headers (Admin / Reports) ───────────── */
 .nav-label {
+  display: inline-block;
   color: white;
   text-decoration: none;
   font-weight: 600;
@@ -216,11 +222,15 @@ body {
   text-transform: uppercase;
   padding: 8px 24px;
   user-select: none;
-  cursor: pointer;
+  cursor: default;
+  transition: all 0.25s ease;
 }
 
+/* Make it match .nav-bar a:hover exactly */
 .nav-label:hover {
-  background-color: #b00000; /* same hover as links */
+  background: #e40000;
+  border-bottom: 3px solid white;
+}
 }
 
 /* Optional: small down arrow for consistency */
@@ -288,3 +298,20 @@ main {
 }
 
 
+
+
+/* ───────────── Fixed Logout Button ───────────── */
+.logout-btn {
+  position: fixed;
+  left: 18px;
+  bottom: 18px;
+  z-index: 1000;
+  background: #cc0100;
+  color: #fff;
+  padding: 10px 18px;
+  border-radius: 12px;
+  font-weight: 700;
+  text-decoration: none;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.18);
+}
+.logout-btn:hover { background: #e40000; }

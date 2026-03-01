@@ -1,4 +1,7 @@
 <?php require_once "../config/db.php"; ?>
+require_once __DIR__ . "/../auth.php";
+require_login();
+require_admin();
 
 <link rel="stylesheet" href="css/mass-comment.css?v=<?= filemtime(__DIR__ . '/../css/mass-comment.css') ?>">
 

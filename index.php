@@ -1,7 +1,12 @@
 <?php
 require_once "config/db.php";
-?>
+require_once "auth.php";
+require_login();
 
+$u = current_user();
+$fullName = trim(($u["first"] ?? "") . " " . ($u["last"] ?? ""));
+$role = $u["role"] ?? "";
+?>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -11,18 +16,15 @@ require_once "config/db.php";
 <link rel="stylesheet" href="css/point-sheet-averages.css">
 <link rel="stylesheet" href="css/calendar.css">
 <link rel="stylesheet" href="css/report-point-sheets.css">
-
-
 </head>
 <body>
 
 <!-- Top thin red line with arc -->
 <div class="header-top">
   <div class="profile">
-    <div class="userName">User Name</div>
+    <div class="userName"><?php echo htmlspecialchars($fullName !== "" ? $fullName : ""); ?></div>
   </div>
 </div>
-
 
 <!-- White section with logo and school name -->
 <header class="header-main">
@@ -35,9 +37,9 @@ require_once "config/db.php";
 <!-- Navigation bar -->
 <nav class="nav-bar">
   <ul>
-    <!-- Regular link -->
     <li><a href="#" data-page="student" class="active">Student</a></li>
 
+<?php if ($role === "Admin"): ?>
     <!-- ADMIN Dropdown (no link) -->
     <li class="has-dropdown">
       <span class="nav-label">Admin ▾</span>
@@ -62,18 +64,15 @@ require_once "config/db.php";
         <li><a href="#" data-page="chart-behavior">Point Sheet Chart by Behavior</a></li>
       </ul>
     </li>
+
+<?php endif; ?>
   </ul>
 </nav>
 
+<main id="content"></main>
 
-  </ul>
-</nav>
-
-<main id="content">
-</main>
+<a class="logout-btn" href="logout.php">Log Out</a>
 
 <script type="module" src="js/main.js?v=<?php echo filemtime(__DIR__ . '/js/main.js'); ?>"></script>
-
-
 </body>
 </html>

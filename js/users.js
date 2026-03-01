@@ -22,6 +22,7 @@ export function initUsersPage() {
   const editLast = document.getElementById("editLast");
   const editEmail = document.getElementById("editEmail");
   const editRole = document.getElementById("editRole");
+  const resetPasswordBtn = document.getElementById("resetPasswordBtn");
 
   let users = [];
   // ✅ Default sort now that ID column is removed
@@ -139,6 +140,9 @@ export function initUsersPage() {
       editEmail.value = u.email ?? "";
       editRole.value = u.role ?? "Teacher";
 
+      // Store target user id for reset
+      if (resetPasswordBtn) resetPasswordBtn.dataset.id = String(u.id);
+
       editModal.style.display = "flex";
       return;
     }
@@ -170,6 +174,34 @@ export function initUsersPage() {
         console.error(err);
         alert(err.message);
       }
+    }
+  });
+
+  // Reset password action
+  resetPasswordBtn?.addEventListener("click", async () => {
+    const id = Number(resetPasswordBtn.dataset.id || 0);
+    if (!id) return;
+    const u = users.find(x => Number(x.id) === id);
+    const name = u ? `${u.first} ${u.last}` : "this user";
+    if (!confirm(`Reset password for ${name} back to 'Centralia'?`)) return;
+
+    try {
+      const body = new URLSearchParams();
+      body.set("id", String(id));
+
+      const res = await fetch("api/users/reset_password.php?v=" + Date.now(), {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: body.toString(),
+        cache: "no-store"
+      });
+
+      const json = await res.json();
+      if (!json.ok) throw new Error(json.error || "Reset failed.");
+      alert(`Password reset. Temporary password is: ${json.tempPassword || "Centralia"}`);
+    } catch (err) {
+      console.error(err);
+      alert(err.message);
     }
   });
 
