@@ -1,3 +1,4 @@
+import { secureFetch } from './security.js';
 export async function initReportPointSheetsPage() {
   console.log("report-point-sheets init");
 
@@ -68,7 +69,7 @@ function toYMD(d) {
 }
 
 async function fetchJson(url) {
-  const res = await fetch(url, { cache: "no-store" });
+  const res = await secureFetch(url, { cache: "no-store" });
   const raw = await res.text();
   let json;
   try { json = JSON.parse(raw); }

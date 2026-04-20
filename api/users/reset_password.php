@@ -3,12 +3,11 @@ declare(strict_types=1);
 
 require_once __DIR__ . "/../_guard.php";
 api_require_login();
+api_require_csrf();
 api_require_admin();
 api_require_method(["POST"]);
 
 require_once __DIR__ . "/../../config/db.php";
-header("Content-Type: application/json; charset=utf-8");
-
 $id = $_POST["id"] ?? "";
 if ($id === "" || !ctype_digit((string)$id)) {
   http_response_code(400);

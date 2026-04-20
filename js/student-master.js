@@ -1,3 +1,4 @@
+import { secureFetch } from './security.js';
 export async function initStudentMasterPage() {
   const tbody = document.getElementById("studentTableBody");
   const modal = document.getElementById("enrollModal");
@@ -61,7 +62,7 @@ export async function initStudentMasterPage() {
   }
 
   async function loadStudents() {
-    const res = await fetch("api/student/list.php?v=" + Date.now(), { cache: "no-store" });
+    const res = await secureFetch("api/student/list.php?v=" + Date.now(), { cache: "no-store" });
     const json = await res.json();
     if (!json.ok) throw new Error(json.error || "Failed to load students");
     students = json.data || [];
@@ -122,7 +123,7 @@ export async function initStudentMasterPage() {
       const body = new URLSearchParams();
       body.set("delta", String(delta));
 
-      const res = await fetch("api/student/grade-shift.php?v=" + Date.now(), {
+      const res = await secureFetch("api/student/grade-shift.php?v=" + Date.now(), {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: body.toString(),
@@ -197,7 +198,7 @@ export async function initStudentMasterPage() {
     body.set("grade", String(grade));
 
     try {
-      const res = await fetch("api/student/create.php?v=" + Date.now(), {
+      const res = await secureFetch("api/student/create.php?v=" + Date.now(), {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: body.toString(),
@@ -251,7 +252,7 @@ export async function initStudentMasterPage() {
     body.set("status", editStatus.value);
 
     try {
-      const res = await fetch("api/student/update.php?v=" + Date.now(), {
+      const res = await secureFetch("api/student/update.php?v=" + Date.now(), {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: body.toString(),

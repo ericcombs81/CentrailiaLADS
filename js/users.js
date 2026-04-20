@@ -1,3 +1,4 @@
+import { secureFetch } from './security.js';
 export function initUsersPage() {
   const tbody = document.getElementById("usersTableBody");
   if (!tbody) return;
@@ -54,7 +55,7 @@ export function initUsersPage() {
   }
 
   async function loadUsers() {
-    const res = await fetch("api/users/list.php", { cache: "no-store" });
+    const res = await secureFetch("api/users/list.php", { cache: "no-store" });
     const json = await res.json();
     if (!json.ok) throw new Error(json.error || "Failed to load users.");
     users = json.data || [];
@@ -158,7 +159,7 @@ export function initUsersPage() {
         const body = new URLSearchParams();
         body.set("id", String(id));
 
-        const res = await fetch("api/users/delete.php?v=" + Date.now(), {
+        const res = await secureFetch("api/users/delete.php?v=" + Date.now(), {
           method: "POST",
           headers: { "Content-Type": "application/x-www-form-urlencoded" },
           body: body.toString(),
@@ -189,7 +190,7 @@ export function initUsersPage() {
       const body = new URLSearchParams();
       body.set("id", String(id));
 
-      const res = await fetch("api/users/reset_password.php?v=" + Date.now(), {
+      const res = await secureFetch("api/users/reset_password.php?v=" + Date.now(), {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: body.toString(),
@@ -215,7 +216,7 @@ export function initUsersPage() {
       body.set("email", addEmail.value.trim());
       body.set("role", addRole.value);
 
-      const res = await fetch("api/users/create.php?v=" + Date.now(), {
+      const res = await secureFetch("api/users/create.php?v=" + Date.now(), {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: body.toString(),
@@ -250,7 +251,7 @@ export function initUsersPage() {
       body.set("email", editEmail.value.trim());
       body.set("role", editRole.value);
 
-      const res = await fetch("api/users/update.php?v=" + Date.now(), {
+      const res = await secureFetch("api/users/update.php?v=" + Date.now(), {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: body.toString(),

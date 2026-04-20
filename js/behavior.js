@@ -1,3 +1,4 @@
+import { secureFetch } from './security.js';
 export function initBehaviorPage() {
   const tbody = document.getElementById("behaviorTableBody");
   if (!tbody) return;
@@ -29,7 +30,7 @@ export function initBehaviorPage() {
   }
 
   async function loadBehaviors() {
-    const res = await fetch("api/behaviors/list.php", { cache: "no-store" });
+    const res = await secureFetch("api/behaviors/list.php", { cache: "no-store" });
     const json = await res.json();
     if (!json.ok) throw new Error(json.error || "Failed to load behaviors.");
     behaviors = json.data || [];
@@ -142,7 +143,7 @@ tr.innerHTML = `
       body.set("behavior_text", addBehaviorText.value.trim());
       body.set("is_default", addIsDefault.value);
 
-      const res = await fetch("api/behaviors/create.php?v=" + Date.now(), {
+      const res = await secureFetch("api/behaviors/create.php?v=" + Date.now(), {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: body.toString(),
@@ -176,7 +177,7 @@ tr.innerHTML = `
       body.set("behavior_text", editBehaviorText.value.trim());
       body.set("is_default", editIsDefault.value);
 
-      const res = await fetch("api/behaviors/update.php?v=" + Date.now(), {
+      const res = await secureFetch("api/behaviors/update.php?v=" + Date.now(), {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: body.toString(),

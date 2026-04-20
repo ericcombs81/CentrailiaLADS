@@ -1,4 +1,12 @@
 <?php
+// DEV_ONLY_GUARD: block this script in production
+$remote = $_SERVER['REMOTE_ADDR'] ?? '';
+if ($remote !== '127.0.0.1' && $remote !== '::1') {
+  http_response_code(403);
+  echo "Forbidden";
+  exit;
+}
+
 // seed_dummy_data.php
 // WARNING: This will DELETE ALL DATA in your Centralia DB tables and reseed them with dummy data.
 // Put this in your project root (next to config/), run it once in browser, then DELETE it.

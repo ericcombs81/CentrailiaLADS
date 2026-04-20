@@ -520,3 +520,48 @@
     box-shadow: none !important;
   }
 }
+
+/* ===========================
+   Student Search Autocomplete
+   Fix: dropdown overlays content
+   =========================== */
+
+.student-search-wrap{
+  position: relative; /* anchors the absolute dropdown to this box */
+}
+
+/* Suggestion dropdown container */
+#studentSuggest.student-suggest{
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+
+  background: #fff;
+  border: 1px solid #d6d6d6;
+  border-radius: 10px;
+  box-shadow: 0 8px 18px rgba(0,0,0,0.12);
+
+  max-height: 260px;
+  overflow-y: auto;
+
+  z-index: 9999;
+  padding: 6px 0;
+
+  /* Your inline style="display:none" controls visibility;
+     JS should toggle display:block when showing results */
+}
+
+/* If your JS renders suggestions as <div> rows */
+#studentSuggest.student-suggest > div{
+  padding: 8px 12px;
+  cursor: pointer;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#studentSuggest.student-suggest > div:hover{
+  background: #fff5f5;
+}

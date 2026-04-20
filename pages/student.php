@@ -108,7 +108,7 @@ require_once "../config/db.php";
 
     <div class="form-comments">
       <label for="comments"><strong>Comments:</strong></label>
-      <textarea id="comments" name="comments" rows="4" placeholder=""></textarea>
+      <textarea id="comments" name="comments" rows="4" placeholder="" autocorrect="on" autocapitalize="sentences" spellcheck="true"></textarea>
     </div>
 
     <!-- Print area (hidden on screen; used for clean print output) -->
@@ -160,4 +160,3 @@ require_once "../config/db.php";
     </div>
 
     <script type="module" src="js/student.js?v=<?= filemtime(__DIR__ . '/../js/student.js') ?>"></script>
-

@@ -1,4 +1,12 @@
 <?php
+// DEV_ONLY_GUARD: block this script in production
+$remote = $_SERVER['REMOTE_ADDR'] ?? '';
+if ($remote !== '127.0.0.1' && $remote !== '::1') {
+  http_response_code(403);
+  echo "Forbidden";
+  exit;
+}
+
 declare(strict_types=1);
 
 require_once __DIR__ . "/config/db.php";

@@ -1,5 +1,40 @@
+import { secureFetch } from './security.js';
+
+let avgSummaryUiWired = false;
+
+function wireAvgSummaryUiOnce() {
+  if (avgSummaryUiWired) return;
+  avgSummaryUiWired = true;
+
+  document.addEventListener("click", async (e) => {
+    const btn = e.target.closest("#btnPrint");
+    if (!btn) return;
+
+    // Make sure we're actually on this page (prevents other pages with same id from triggering)
+    if (!document.querySelector("section.report-avg-summary")) return;
+
+    try {
+      const studentSel = document.getElementById("studentSelect");
+      const startDate = document.getElementById("startDate");
+      const endDate = document.getElementById("endDate");
+
+      await printAvgSummaryPreview({
+        studentText: selectedText(studentSel),
+        start: startDate?.value || "",
+        end: endDate?.value || ""
+      });
+    } catch (err) {
+      console.error(err);
+      alert(err.message || String(err));
+    }
+  });
+}
+
+
 export async function initPointSheetAveragesSummaryPage() {
   console.log("point-sheet-averages-summary init");
+
+    wireAvgSummaryUiOnce(); // ✅ add this
 
   // SPA-safe re-init
   if (window.__avgSummaryAbort) {
@@ -45,19 +80,6 @@ export async function initPointSheetAveragesSummaryPage() {
   studentSel.addEventListener("change", () => { updateMeta(); rerenderDebounced(); }, { signal });
   startDate.addEventListener("change", () => { updateMeta(); rerenderDebounced(); }, { signal });
   endDate.addEventListener("change", () => { updateMeta(); rerenderDebounced(); }, { signal });
-
-  btnPrint?.addEventListener("click", async () => {
-    try {
-      await exportReportPreviewToPdf({
-        studentText: selectedText(studentSel),
-        start: startDate.value,
-        end: endDate.value
-      });
-    } catch (err) {
-      console.error(err);
-      alert(err.message || String(err));
-    }
-  }, { signal });
 
   // ---------- functions ----------
   function updateMeta() {
@@ -157,7 +179,7 @@ function debounce(fn, waitMs) {
 }
 
 async function fetchJson(url) {
-  const res = await fetch(url, { cache: "no-store" });
+  const res = await secureFetch(url, { cache: "no-store" });
   const raw = await res.text();
   let json;
   try { json = JSON.parse(raw); }
@@ -186,114 +208,86 @@ function escapeHtml(str) {
     .replaceAll("'", "&#039;");
 }
 
-/* ---------------- PDF Export (same approach you already use) ---------------- */
+/* ---------------- Print (no external libs; same pattern as student.js) ---------------- */
 
-async function exportReportPreviewToPdf({ studentText, start, end }) {
-  const preview = document.querySelector('section.report-preview[aria-label="Report Preview"]');
-  if (!preview) throw new Error("Could not find report preview section.");
+let avgSummaryPrintStyleInjected = false;
 
-  await ensurePdfLibs();
-  const html2canvas = window.html2canvas;
-  const { jsPDF } = window.jspdf || {};
-  if (!html2canvas || !jsPDF) throw new Error("PDF libraries failed to load.");
+function ensureAvgSummaryPrintArea() {
+  let el = document.getElementById("avgSummaryPrintArea");
+  if (!el) {
+    el = document.createElement("div");
+    el.id = "avgSummaryPrintArea";
+    el.className = "avg-summary-print-area";
+    el.setAttribute("aria-label", "Averages Summary Print Area");
+    // hidden on screen; visible only during print via injected @media print rules
+    el.style.display = "none";
+    document.body.appendChild(el);
+  }
+  return el;
+}
 
-  // Letter portrait
-  const pageW = 612;
-  const pageH = 792;
-  const marginX = 36;
-  const marginTop = 36;
-  const marginBottom = 36;
+function ensureAvgSummaryPrintStyle() {
+  if (avgSummaryPrintStyleInjected) return;
+  avgSummaryPrintStyleInjected = true;
 
-  const maxWpt = pageW - marginX * 2;
-  const maxHpt = pageH - marginTop - marginBottom;
+  const style = document.createElement("style");
+  style.id = "avgSummaryPrintStyle";
+  style.textContent = `
+@media print {
+  @page { size: letter portrait; margin: 0.4in; }
 
-  const ptToPx = 96 / 72;
-  const targetCssWidthPx = Math.round(maxWpt * ptToPx);
+  /* Print ONLY what we inject into #avgSummaryPrintArea */
+  body * { visibility: hidden !important; }
 
-  // Clone for clean capture
-  const clone = preview.cloneNode(true);
-  clone.style.position = "fixed";
-  clone.style.left = "-10000px";
-  clone.style.top = "0";
-  clone.style.width = `${targetCssWidthPx}px`;
-  clone.style.maxWidth = `${targetCssWidthPx}px`;
-  clone.style.overflow = "visible";
-  clone.style.transform = "none";
-  clone.style.background = "#fff";
-  clone.style.zIndex = "999999";
-  clone.style.boxSizing = "border-box";
-  clone.style.padding = "0";
-
-  document.body.appendChild(clone);
-  clone.getBoundingClientRect();
-
-  const canvas = await html2canvas(clone, {
-    backgroundColor: "#ffffff",
-    scale: 2,
-    useCORS: true,
-    windowWidth: targetCssWidthPx
-  });
-
-  document.body.removeChild(clone);
-
-  const imgData = canvas.toDataURL("image/png");
-
-  // Fit to width inside margins
-  const imgPxW = canvas.width;
-  const imgPxH = canvas.height;
-
-  let drawW = maxWpt;
-  let drawH = imgPxH * (drawW / imgPxW);
-  if (drawH > maxHpt) {
-    drawH = maxHpt;
-    drawW = imgPxW * (drawH / imgPxH);
+  #avgSummaryPrintArea,
+  #avgSummaryPrintArea * {
+    visibility: visible !important;
   }
 
-  const x = (pageW - drawW) / 2;
-  const y = marginTop;
-
-  const pdf = new jsPDF({ orientation: "p", unit: "pt", format: "letter" });
-  pdf.addImage(imgData, "PNG", x, y, drawW, drawH);
-
-  const filename = makeFilename("PointSheetAverages", studentText, start, end);
-  pdf.save(filename);
+  #avgSummaryPrintArea {
+    display: block !important;
+    position: absolute !important;
+    inset: 0 !important;
+    padding: 0 !important;
+  }
+}
+`;
+  document.head.appendChild(style);
 }
 
-function makeFilename(prefix, student, start, end) {
-  const clean = (s) =>
-    String(s || "")
-      .replace(/[\/\\?%*:|"<>]/g, "-")
-      .replace(/\s+/g, "_")
-      .replace(/_+/g, "_")
-      .trim();
+async function printAvgSummaryPreview({ studentText, start, end }) {
+  // grab the "paper" so we print a clean 1-page report
+  const paper = document.getElementById("avgSummaryPaper")
+    || document.querySelector("section.report-preview .paper");
+  if (!paper) throw new Error("Could not find #avgSummaryPaper to print.");
 
-  return `${clean(prefix)}_${clean(student)}_${clean(start)}_${clean(end)}.pdf`;
+  ensureAvgSummaryPrintStyle();
+  const printArea = ensureAvgSummaryPrintArea();
+
+  const prevTitle = document.title;
+  const titleBits = [
+    "Point Sheet Averages",
+    (studentText || "").trim(),
+    (start && end) ? `${start} to ${end}` : ""
+  ].filter(Boolean);
+
+  document.title = titleBits.join(" - ");
+
+  try {
+    // Clone current paper (already reflects selected student/range + injected rows)
+    const clone = paper.cloneNode(true);
+
+    // Optional: force white background so printers don't gray it out
+    clone.style.background = "#fff";
+
+    printArea.innerHTML = "";
+    printArea.appendChild(clone);
+
+    window.print();
+  } finally {
+    document.title = prevTitle;
+    // give the print dialog a moment before clearing
+    setTimeout(() => { printArea.innerHTML = ""; }, 250);
+  }
 }
 
-async function ensurePdfLibs() {
-  if (window.html2canvas && window.jspdf?.jsPDF) return;
-  await loadScriptOnce("https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js", "html2canvas");
-  await loadScriptOnce("https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js", "jspdf");
-}
-
-function loadScriptOnce(src, globalNameHint) {
-  return new Promise((resolve, reject) => {
-    if (globalNameHint === "html2canvas" && window.html2canvas) return resolve();
-    if (globalNameHint === "jspdf" && window.jspdf?.jsPDF) return resolve();
-
-    const existing = document.querySelector(`script[data-src="${CSS.escape(src)}"]`);
-    if (existing) {
-      existing.addEventListener("load", () => resolve(), { once: true });
-      existing.addEventListener("error", () => reject(new Error(`Failed to load ${src}`)), { once: true });
-      return;
-    }
-
-    const s = document.createElement("script");
-    s.src = src;
-    s.async = true;
-    s.setAttribute("data-src", src);
-    s.onload = () => resolve();
-    s.onerror = () => reject(new Error(`Failed to load ${src}`));
-    document.head.appendChild(s);
-  });
-}

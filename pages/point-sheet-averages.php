@@ -1,7 +1,7 @@
 <?php
 require_once __DIR__ . "/../auth.php";
 require_login();
-require_admin();
+require_reports_access();
 // pages/point-sheet-averages.php
 // (No JSON headers here — this is HTML that gets injected into #content)
 ?>

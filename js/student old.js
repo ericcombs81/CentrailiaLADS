@@ -1,3 +1,4 @@
+import { secureFetch } from './security.js';
 // student.js
 // Daily Point Sheet page logic (build behaviors table + live totals)
 
@@ -143,7 +144,7 @@ async function loadActiveStudentsIntoDropdown() {
   sel.innerHTML = `<option value="">Select student...</option>`;
 
   try {
-    const res = await fetch("api/student/list.php?v=" + Date.now(), { cache: "no-store" });
+    const res = await secureFetch("api/student/list.php?v=" + Date.now(), { cache: "no-store" });
     const json = await res.json();
     if (!json.ok) throw new Error(json.error || "Failed to load students");
 
@@ -345,7 +346,7 @@ export async function initStudentPage() {
 
   let behaviors = [];
   try {
-    const res = await fetch("api/behaviors/list.php?v=" + Date.now(), { cache: "no-store" });
+    const res = await secureFetch("api/behaviors/list.php?v=" + Date.now(), { cache: "no-store" });
     const json = await res.json();
     if (!json.ok) throw new Error(json.error || "Failed to load behaviors");
 
@@ -402,7 +403,7 @@ async function renderBehaviorTableFor(student_id, session_date) {
   const commentsEl = document.getElementById("comments");
   if (commentsEl) commentsEl.value = "";
 
-  const res = await fetch(
+  const res = await secureFetch(
     `api/student-behaviors/list.php?student_id=${encodeURIComponent(student_id)}&date=${encodeURIComponent(session_date)}&v=${Date.now()}`,
     { cache: "no-store" }
   );
@@ -470,7 +471,7 @@ async function submitPointSheet() {
 
   const payload = { student_id, session_date, comments, marks };
 
-  const res = await fetch("api/point-sheet/create.php?v=" + Date.now(), {
+  const res = await secureFetch("api/point-sheet/create.php?v=" + Date.now(), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
@@ -487,7 +488,7 @@ async function submitPointSheet() {
 }
 
 async function loadPointSheet(student_id, session_date) {
-  const res = await fetch(
+  const res = await secureFetch(
     `api/point-sheet/list.php?student_id=${encodeURIComponent(student_id)}&session_date=${encodeURIComponent(session_date)}&v=${Date.now()}`,
     { cache: "no-store" }
   );
@@ -609,7 +610,7 @@ function escapeHtml(str) {
 }
 
 async function fetchJsonText(url, opts = {}) {
-  const res = await fetch(url, { cache: "no-store", ...opts });
+  const res = await secureFetch(url, { cache: "no-store", ...opts });
   const raw = await res.text();
   let json;
   try { json = JSON.parse(raw); }

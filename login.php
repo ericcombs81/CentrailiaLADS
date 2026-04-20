@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 require_once __DIR__ . "/config/db.php";
 require_once __DIR__ . "/auth.php";
+security_headers_html();
+$csrf = csrf_token();
 
 if (is_logged_in()) {
   header("Location: index.php");
@@ -12,6 +14,10 @@ if (is_logged_in()) {
 $error = "";
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
+  $postedToken = (string)($_POST["csrf_token"] ?? "");
+  if (!csrf_check($postedToken)) {
+    $error = "Security check failed. Please refresh and try again.";
+  } else {
   $email = trim($_POST["email"] ?? "");
   $password = (string)($_POST["password"] ?? "");
 
@@ -37,6 +43,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
       if ($u && password_verify($password, $u["password_hash"])) {
         // Login OK
+        security_on_login_success();
         $_SESSION["user_id"] = (int)$u["id"];
         $_SESSION["email"] = $u["email"];
         $_SESSION["first"] = $u["first"];
@@ -66,7 +73,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
       $error = "Server error (login).";
     }
   }
+  }
 }
+
 ?>
 <html lang="en">
 <head>
@@ -108,6 +117,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
       <?php endif; ?>
 
       <form method="POST" class="login-form" autocomplete="off">
+        <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrf, ENT_QUOTES, 'UTF-8'); ?>">
         <label>Email</label>
         <input type="email" name="email" required>
 

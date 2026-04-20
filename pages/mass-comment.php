@@ -1,7 +1,9 @@
-<?php require_once "../config/db.php"; ?>
+<?php
 require_once __DIR__ . "/../auth.php";
 require_login();
 require_admin();
+security_headers_html();
+?>
 
 <link rel="stylesheet" href="css/mass-comment.css?v=<?= filemtime(__DIR__ . '/../css/mass-comment.css') ?>">
 
@@ -18,7 +20,7 @@ require_admin();
 
     <div class="form-row">
       <label for="mcText">Comment:</label>
-      <textarea id="mcText" rows="3" placeholder="Type the comment to prepend to ALL students..."></textarea>
+      <textarea id="mcText" rows="3" placeholder="Type the comment to prepend to ALL students..." autocorrect="on" autocapitalize="sentences" spellcheck="true"></textarea>
     </div>
 
     <div class="form-row actions">
@@ -59,7 +61,7 @@ require_admin();
 
       <div class="form-row">
         <label>Comment:</label>
-        <textarea id="mcEditText" rows="4"></textarea>
+        <textarea id="mcEditText" rows="4" autocorrect="on" autocapitalize="sentences" spellcheck="true"></textarea>
       </div>
 
       <div class="modal-actions">

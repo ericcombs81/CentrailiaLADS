@@ -1,3 +1,4 @@
+import { secureFetch } from './security.js';
 export function initEnrolledDroppedPage() {
   const tbody = document.getElementById("enrolledTableBody");
   const dropBtn = document.getElementById("dropAllBtn");
@@ -20,7 +21,7 @@ export function initEnrolledDroppedPage() {
   }
 
   async function loadStudents() {
-    const res = await fetch("api/student/list.php", { cache: "no-store" });
+    const res = await secureFetch("api/student/list.php", { cache: "no-store" });
     const json = await res.json();
     if (!json.ok) throw new Error(json.error || "Failed to load students");
     students = json.data || [];
@@ -124,7 +125,7 @@ export function initEnrolledDroppedPage() {
           body.set("grade", String(Number(s.grade || 0)));
           body.set("status", "0");
 
-          const res = await fetch("api/student/update.php?v=" + Date.now(), {
+          const res = await secureFetch("api/student/update.php?v=" + Date.now(), {
             method: "POST",
             headers: { "Content-Type": "application/x-www-form-urlencoded" },
             body: body.toString(),

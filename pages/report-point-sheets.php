@@ -1,7 +1,7 @@
 <?php
 require_once __DIR__ . "/../auth.php";
 require_login();
-require_admin();
+require_reports_access();
 // pages/report-point-sheets.php
 ?>
 
@@ -27,4 +27,3 @@ require_admin();
   <!-- Hidden on screen; shown during print -->
   <div id="rpsPrintArea" class="rps-print-area" aria-label="Point Sheets Print Area"></div>
 </div>
-

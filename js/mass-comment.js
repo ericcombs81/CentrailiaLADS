@@ -1,3 +1,4 @@
+import { secureFetch } from './security.js';
 export function initMassCommentPage() {
   const dateEl = document.getElementById("mcDate");
   const textEl = document.getElementById("mcText");
@@ -27,7 +28,7 @@ export function initMassCommentPage() {
   }
 
   async function fetchJson(url, opts) {
-    const res = await fetch(url, { cache: "no-store", ...(opts || {}) });
+    const res = await secureFetch(url, { cache: "no-store", ...(opts || {}) });
     const raw = await res.text();
     let json;
     try { json = JSON.parse(raw); }

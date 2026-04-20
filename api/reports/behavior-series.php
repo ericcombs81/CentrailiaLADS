@@ -1,11 +1,10 @@
 <?php
 require_once __DIR__ . "/../_guard.php";
 api_require_login();
-api_require_admin();
+api_require_csrf();
+api_require_reports_access();
 // api/reports/behavior-series.php
 require_once __DIR__ . "/../../config/db.php";
-header("Content-Type: application/json; charset=utf-8");
-
 $student_id  = (int)($_GET["student_id"] ?? 0);
 $behavior_id = (int)($_GET["behavior_id"] ?? 0);
 $start       = $_GET["start"] ?? "";
@@ -62,4 +61,3 @@ while ($row = $res->fetch_assoc()) {
 }
 
 echo json_encode(["ok" => true, "data" => $rows]);
-

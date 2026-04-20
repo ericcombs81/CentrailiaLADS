@@ -1,7 +1,8 @@
 <?php
 require_once __DIR__ . "/../_guard.php";
 api_require_login();
-api_require_admin();
+api_require_csrf();
+api_require_reports_access();
 require_once __DIR__ . "/../../config/db.php";
 header("Content-Type: application/json");
 
@@ -39,4 +40,3 @@ try {
 } catch (Exception $e) {
   echo json_encode(["ok" => false, "error" => $e->getMessage()]);
 }
-

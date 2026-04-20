@@ -2,9 +2,8 @@
 // auth.php (shared session helpers for page requests)
 declare(strict_types=1);
 
-if (session_status() !== PHP_SESSION_ACTIVE) {
-  session_start();
-}
+require_once __DIR__ . "/includes/security.php";
+security_bootstrap();
 
 function is_logged_in(): bool {
   return !empty($_SESSION["user_id"]);
@@ -45,6 +44,18 @@ function require_admin(): void {
     echo "<div style='padding:30px;font-family:Arial,sans-serif;color:#b00000;'>
             <h2>Forbidden</h2>
             <p>You do not have permission to access this page.</p>
+          </div>";
+    exit;
+  }
+}
+
+function require_reports_access(): void {
+  $role = $_SESSION["role"] ?? "";
+  if ($role !== "Admin" && $role !== "Teacher") {
+    http_response_code(403);
+    echo "<div style='padding:30px;font-family:Arial,sans-serif;color:#b00000;'>
+            <h2>Forbidden</h2>
+            <p>You do not have permission to access reports.</p>
           </div>";
     exit;
   }

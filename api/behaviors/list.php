@@ -1,9 +1,8 @@
 <?php
 require_once __DIR__ . "/../_guard.php";
 api_require_login();
+api_require_csrf();
 require_once __DIR__ . "/../../config/db.php";
-header("Content-Type: application/json; charset=utf-8");
-
 // Defaults on top, then alphabetical
 $sql = "
   SELECT behavior_id, behavior_text, is_active, created_at, is_default

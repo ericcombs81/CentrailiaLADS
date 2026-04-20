@@ -1,3 +1,6 @@
+import { secureFetch } from './security.js';
+import { initCsrf } from './security.js';
+
 // main.js
 const v = Date.now(); // dev cache-bust
 
@@ -10,7 +13,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     try {
       // cache-bust page HTML too
-      const response = await fetch(`pages/${page}.php?v=${v}`, { cache: "no-store" });
+      const response = await secureFetch(`pages/${page}.php?v=${v}`, { cache: "no-store" });
       if (!response.ok) throw new Error(`Failed to load ${page}.php`);
 
       const html = await response.text();
@@ -49,7 +52,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initPointSheetAveragesPage?.();
 } else if (page === "point-sheet-averages-summary") {
   const { initPointSheetAveragesSummaryPage } = await import(
-    new URL("./point-sheet-averages-summary.js?v=${v}", import.meta.url)
+    new URL(`./point-sheet-averages-summary.js?v=${v}`, import.meta.url)
   );
   initPointSheetAveragesSummaryPage?.();
 } else if (page === "mass-comment") {
@@ -87,6 +90,9 @@ document.addEventListener("DOMContentLoaded", () => {
       loadPage(page);
     });
   });
+
+  // Initialize CSRF token for API calls
+  initCsrf();
 
   // Load default page
   loadPage("student");

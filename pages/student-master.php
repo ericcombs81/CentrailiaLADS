@@ -5,7 +5,7 @@ require_admin();
 require_once "../config/db.php";
 ?>
 
-<link rel="stylesheet" href="css/student-master.css?v=10">
+<link rel="stylesheet" href="css/student-master.css?v=14">
 
 <div class="student-master">
   <div class="header-row">

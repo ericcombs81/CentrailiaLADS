@@ -1,3 +1,4 @@
+import { secureFetch } from './security.js';
 export async function initChartByBehaviorPage() {
   console.log("chart-behavior init");
 
@@ -75,21 +76,16 @@ export async function initChartByBehaviorPage() {
     rerenderDebounced();
   }, { signal });
 
-  btnPrint?.addEventListener("click", async () => {
+  btnPrint?.addEventListener("click", () => {
     try {
-      await exportReportPreviewToPdf({
-        studentText: selectedText(studentSel),
-        behaviorText: selectedText(behaviorSel),
-        start: startDate.value,
-        end: endDate.value
-      });
+      // Use native print to avoid blocked external PDF/Canvas libraries (CSP/CDN restrictions)
+      printReportPreview();
     } catch (err) {
       console.error(err);
       alert(err.message || String(err));
     }
   }, { signal });
-
-  // ---------- functions ----------
+// ---------- functions ----------
   function updateMeta() {
     if (metaStudent) metaStudent.textContent = selectedText(studentSel) || "—";
     if (metaBehavior) metaBehavior.textContent = selectedText(behaviorSel) || "—";
@@ -227,7 +223,7 @@ function debounce(fn, waitMs) {
 }
 
 async function fetchJson(url) {
-  const res = await fetch(url, { cache: "no-store" });
+  const res = await secureFetch(url, { cache: "no-store" });
   const raw = await res.text();
   let json;
   try { json = JSON.parse(raw); }
@@ -348,6 +344,67 @@ function text(x, y, str, color, anchor = "start") {
   el.setAttribute("text-anchor", anchor);
   el.textContent = str;
   return el;
+}
+
+/* ---------------- Print ---------------- */
+
+function ensurePrintStyle() {
+  if (document.getElementById("chartBehaviorPrintStyle")) return;
+  const style = document.createElement("style");
+  style.id = "chartBehaviorPrintStyle";
+  style.textContent = `
+    @media print {
+      body * { visibility: hidden !important; }
+      #chartBehaviorPrintArea, #chartBehaviorPrintArea * { visibility: visible !important; }
+      #chartBehaviorPrintArea { 
+        position: absolute; 
+        left: 0; 
+        top: 0; 
+        width: 100%; 
+        padding: 0; 
+        margin: 0; 
+      }
+    }
+  `;
+  document.head.appendChild(style);
+}
+
+function ensurePrintArea() {
+  let area = document.getElementById("chartBehaviorPrintArea");
+  if (!area) {
+    area = document.createElement("div");
+    area.id = "chartBehaviorPrintArea";
+    area.style.display = "none";
+    document.body.appendChild(area);
+  }
+  return area;
+}
+
+function printReportPreview() {
+  const preview = document.querySelector('section.report-preview[aria-label="Report Preview"]');
+  if (!preview) throw new Error("Could not find report preview section to print.");
+
+  ensurePrintStyle();
+  const area = ensurePrintArea();
+
+  // Clone preview into print area
+  area.innerHTML = "";
+  const clone = preview.cloneNode(true);
+
+  // Remove any interactive controls that shouldn't appear on paper
+  clone.querySelectorAll("button, .no-print").forEach(el => el.remove());
+
+  area.appendChild(clone);
+  area.style.display = "block";
+
+  const cleanup = () => {
+    area.style.display = "none";
+    window.removeEventListener("afterprint", cleanup);
+  };
+  window.addEventListener("afterprint", cleanup);
+
+  // Give layout a tick before printing (helps in some browsers)
+  requestAnimationFrame(() => window.print());
 }
 
 /* ---------------- PDF Export ---------------- */

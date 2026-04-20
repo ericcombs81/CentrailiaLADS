@@ -1,3 +1,4 @@
+import { secureFetch } from './security.js';
 let allActiveStudents = [];
 let currentStudentId = 0;
 let assignedSet = new Set();
@@ -59,7 +60,7 @@ async function loadActiveStudentsIntoDropdown() {
 
   sel.innerHTML = `<option value="">Select student...</option>`;
 
-  const res = await fetch("api/student/list.php?v=" + Date.now(), { cache: "no-store" });
+  const res = await secureFetch("api/student/list.php?v=" + Date.now(), { cache: "no-store" });
   const json = await res.json();
   if (!json.ok) throw new Error(json.error || "Failed to load students");
 
@@ -221,14 +222,14 @@ function initStudentTypeahead() {
 }
 
 async function loadAllBehaviors() {
-  const res = await fetch("api/behaviors/list.php?v=" + Date.now(), { cache: "no-store" });
+  const res = await secureFetch("api/behaviors/list.php?v=" + Date.now(), { cache: "no-store" });
   const json = await res.json();
   if (!json.ok) throw new Error(json.error || "Failed to load behaviors");
   return json.data || [];
 }
 
 async function loadAssignedBehaviorIds(student_id) {
-  const res = await fetch(
+  const res = await secureFetch(
     `api/student-behaviors/list-current.php?student_id=${encodeURIComponent(student_id)}&v=${Date.now()}`,
     { cache: "no-store" }
   );
@@ -331,7 +332,7 @@ async function saveAssignments() {
   const btn = document.getElementById("saveAssignmentsBtn");
   if (btn) btn.disabled = true;
 
-  const res = await fetch("api/student-behaviors/save.php?v=" + Date.now(), {
+  const res = await secureFetch("api/student-behaviors/save.php?v=" + Date.now(), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
@@ -391,7 +392,7 @@ function wireAddBehaviorModal() {
       body.set("behavior_text", txt);
       body.set("is_default", String(is_default));
 
-      const res = await fetch("api/behaviors/create.php?v=" + Date.now(), {
+      const res = await secureFetch("api/behaviors/create.php?v=" + Date.now(), {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: body.toString(),

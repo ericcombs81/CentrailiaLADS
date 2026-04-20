@@ -2,11 +2,9 @@
 // api/_guard.php (shared session helpers for API endpoints)
 declare(strict_types=1);
 
-header("Content-Type: application/json; charset=utf-8");
-
-if (session_status() !== PHP_SESSION_ACTIVE) {
-  session_start();
-}
+require_once __DIR__ . '/../includes/security.php';
+security_bootstrap();
+security_headers_json();
 
 function api_require_login(): void {
   if (empty($_SESSION["user_id"])) {
@@ -37,6 +35,15 @@ function api_require_admin(): void {
   }
 }
 
+function api_require_reports_access(): void {
+  $role = $_SESSION["role"] ?? "";
+  if ($role !== "Admin" && $role !== "Teacher") {
+    http_response_code(403);
+    echo json_encode(["ok" => false, "error" => "Forbidden"]);
+    exit;
+  }
+}
+
 function api_require_method(array $allowed): void {
   $m = $_SERVER["REQUEST_METHOD"] ?? "GET";
   if (!in_array($m, $allowed, true)) {
@@ -44,4 +51,9 @@ function api_require_method(array $allowed): void {
     echo json_encode(["ok" => false, "error" => "Method not allowed"]);
     exit;
   }
+}
+
+
+function api_require_csrf(): void {
+  csrf_verify_or_die();
 }

@@ -1,3 +1,4 @@
+import { secureFetch } from './security.js';
 // student.js
 // Daily Point Sheet page logic (build behaviors table + live totals)
 
@@ -175,7 +176,7 @@ async function loadActiveStudentsIntoDropdown() {
   sel.innerHTML = `<option value="">Select student...</option>`;
 
   try {
-    const res = await fetch("api/student/list.php?v=" + Date.now(), { cache: "no-store" });
+    const res = await secureFetch("api/student/list.php?v=" + Date.now(), { cache: "no-store" });
     const json = await res.json();
     if (!json.ok) throw new Error(json.error || "Failed to load students");
 
@@ -377,7 +378,7 @@ export async function initStudentPage() {
 
   let behaviors = [];
   try {
-    const res = await fetch("api/behaviors/list.php?v=" + Date.now(), { cache: "no-store" });
+    const res = await secureFetch("api/behaviors/list.php?v=" + Date.now(), { cache: "no-store" });
     const json = await res.json();
     if (!json.ok) throw new Error(json.error || "Failed to load behaviors");
 
@@ -438,7 +439,7 @@ async function renderBehaviorTableFor(student_id, session_date) {
   // Clear attendance flags for a fresh render
   applyAttendanceMask(0);
 
-  const res = await fetch(
+  const res = await secureFetch(
     `api/student-behaviors/list.php?student_id=${encodeURIComponent(student_id)}&date=${encodeURIComponent(session_date)}&v=${Date.now()}`,
     { cache: "no-store" }
   );
@@ -531,7 +532,7 @@ async function submitPointSheet() {
 
   const payload = { student_id, session_date, comments, present_mask, marks };
 
-  const res = await fetch("api/point-sheet/create.php?v=" + Date.now(), {
+  const res = await secureFetch("api/point-sheet/create.php?v=" + Date.now(), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
@@ -548,7 +549,7 @@ async function submitPointSheet() {
 }
 
 async function loadPointSheet(student_id, session_date) {
-  const res = await fetch(
+  const res = await secureFetch(
     `api/point-sheet/list.php?student_id=${encodeURIComponent(student_id)}&session_date=${encodeURIComponent(session_date)}&v=${Date.now()}`,
     { cache: "no-store" }
   );
@@ -673,7 +674,7 @@ function escapeHtml(str) {
 }
 
 async function fetchJsonText(url, opts = {}) {
-  const res = await fetch(url, { cache: "no-store", ...opts });
+  const res = await secureFetch(url, { cache: "no-store", ...opts });
   const raw = await res.text();
   let json;
   try { json = JSON.parse(raw); }
@@ -799,70 +800,67 @@ function wirePrintUIOnce() {
   if (printUiWired) return;
   printUiWired = true;
 
-  // Open modal
-  const openBtn = document.getElementById("printDailyPoints");
-  if (openBtn) {
-    openBtn.addEventListener("click", async () => {
-      try { await loadClassTable(); } catch (e) { console.error(e); }
+  document.addEventListener("click", async (e) => {
+    const t = e.target;
+
+    // Open modal (Print Daily Points)
+    if (t?.closest?.("#printDailyPoints")) {
+      try { await loadClassTable(); } catch (err) { console.error(err); }
       openModal();
-    });
-  }
+      return;
+    }
 
-  // Close actions
-  document.getElementById("printModalClose")?.addEventListener("click", closeModal);
-  document.getElementById("printModalCancel")?.addEventListener("click", closeModal);
+    // Close actions
+    if (t?.closest?.("#printModalClose") || t?.closest?.("#printModalCancel")) {
+      closeModal();
+      return;
+    }
 
-  document.getElementById("printModal")?.addEventListener("click", (e) => {
-    if (e.target && e.target.id === "printModal") closeModal();
-  });
+    // Click outside modal content (backdrop)
+    if (t?.id === "printModal") {
+      closeModal();
+      return;
+    }
 
-  // Print This Student
-  document.getElementById("printThisStudentBtn")?.addEventListener("click", async () => {
-    const studentSel = document.getElementById("student");
-    const sid = String(studentSel?.value || "");
-    if (!sid) return alert("Select a student first.");
-    closeModal();
-    await printStudentsViaReportRenderer([sid]);
-  });
+    // Print This Student
+    if (t?.closest?.("#printThisStudentBtn")) {
+      const studentSel = document.getElementById("student");
+      const sid = String(studentSel?.value || "");
+      if (!sid) return alert("Select a student first.");
+      closeModal();
+      await printStudentsViaReportRenderer([sid]);
+      return;
+    }
 
-  // Save Class Selection (server + per-user localStorage)
-document.getElementById("saveClassSelectionBtn")?.addEventListener("click", async () => {
+    // Save Class Selection
+    if (t?.closest?.("#saveClassSelectionBtn")) {
+      const ids = getSelectedClassIds();
+      await saveSelection(ids); // <- call whatever function you already have below
+      return;
+    }
+
+    // Print Selected Class
+if (t?.closest?.("#printClassBtn")) {
   const ids = getSelectedClassIds();
-
-  try {
-    const res = await fetch("api/student/class-selection-save.php?v=" + Date.now(), {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ student_ids: ids }),
-      cache: "no-store"
-    });
-
-    const raw = await res.text();
-    let json;
-    try { json = JSON.parse(raw); }
-    catch { throw new Error("Non-JSON response: " + raw.slice(0, 200)); }
-
-    if (!json.ok) throw new Error(json.error || "Save failed");
-
-    const uid = json.user_id ? String(json.user_id) : "";
-    const userKey = uid ? `teacherClassSelection_u${uid}` : "teacherClassSelection";
-
-    // Keep a per-user local backup (no cross-user leakage)
-    localStorage.setItem(userKey, JSON.stringify(ids));
-    localStorage.removeItem("teacherClassSelection"); // kill legacy key
-
-    showToast("Class selection saved.", 1200);
-  } catch (err) {
-    console.error(err);
-    alert("Server save failed:\n\n" + (err?.message || err));
-  }
-});
-
-  // Print Selected
-  document.getElementById("printClassBtn")?.addEventListener("click", async () => {
-    const ids = getSelectedClassIds();
-    if (!ids.length) return alert("Select at least one student.");
-    closeModal();
-    await printStudentsViaReportRenderer(ids);
+  if (!ids.length) return alert("Select at least one student.");
+  closeModal();
+  await printStudentsViaReportRenderer(ids);
+  return;
+}
   });
+}
+
+async function saveSelection(studentIds) {
+  const json = await fetchJsonText("api/student/class-selection-save.php?v=" + Date.now(), {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ student_ids: studentIds }),
+  });
+
+  // keep a per-user local cache too (matches your loadClassTable logic)
+  const uid = json.user_id ? String(json.user_id) : "";
+  const userKey = uid ? `teacherClassSelection_u${uid}` : "teacherClassSelection";
+  localStorage.setItem(userKey, JSON.stringify(studentIds));
+
+  alert(`Saved ${json.saved_count ?? studentIds.length} student(s).`);
 }

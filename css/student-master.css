@@ -239,10 +239,11 @@
   display: none;
   position: fixed;
   inset: 0;
-  background-color: rgba(0,0,0,0.4);
+  background-color: rgba(0, 0, 0, 0.4);
   justify-content: center;
   align-items: center;
   animation: fadeIn 0.2s ease-out;
+  z-index: 400;
 }
 
 @keyframes fadeIn {

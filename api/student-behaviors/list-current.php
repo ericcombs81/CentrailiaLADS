@@ -1,9 +1,8 @@
 <?php
 require_once __DIR__ . "/../_guard.php";
 api_require_login();
+api_require_csrf();
 require_once __DIR__ . "/../../config/db.php";
-header("Content-Type: application/json; charset=utf-8");
-
 $student_id = (int)($_GET["student_id"] ?? 0);
 if ($student_id <= 0) {
   http_response_code(400);
