@@ -57,7 +57,6 @@ $role = $u["role"] ?? "";
 
 <?php endif; ?>
 
-<?php if ($role === "Admin"): ?>
     <!-- REPORTS Dropdown (no link) -->
     <li class="has-dropdown">
       <span class="nav-label">Reports ▾</span>
@@ -69,10 +68,6 @@ $role = $u["role"] ?? "";
       </ul>
     </li>
 
-<?php endif; ?>
-<?php if ($role === "Teacher"): ?>
-    <li><a href="#" data-page="report-point-sheets">Reports</a></li>
-<?php endif; ?>
   </ul>
 </nav>
 

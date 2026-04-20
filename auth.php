@@ -19,6 +19,10 @@ function current_user(): array {
   ];
 }
 
+function is_teacher_like_role(string $role): bool {
+  return $role === "Teacher" || $role === "Classroom Assistant";
+}
+
 function require_login(): void {
   if (!is_logged_in()) {
     header("Location: login.php");
@@ -50,8 +54,7 @@ function require_admin(): void {
 }
 
 function require_reports_access(): void {
-  $role = $_SESSION["role"] ?? "";
-  if ($role !== "Admin" && $role !== "Teacher") {
+  if (!is_logged_in()) {
     http_response_code(403);
     echo "<div style='padding:30px;font-family:Arial,sans-serif;color:#b00000;'>
             <h2>Forbidden</h2>

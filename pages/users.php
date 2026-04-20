@@ -50,6 +50,7 @@ require_once "../config/db.php";
           <label for="addRole">Role:</label>
           <select id="addRole" required>
             <option value="Teacher">Teacher</option>
+            <option value="Classroom Assistant">Classroom Assistant</option>
             <option value="Admin">Admin</option>
           </select>
         </div>
@@ -92,6 +93,7 @@ require_once "../config/db.php";
             <label for="editRole">Role:</label>
             <select id="editRole" required>
               <option value="Teacher">Teacher</option>
+              <option value="Classroom Assistant">Classroom Assistant</option>
               <option value="Admin">Admin</option>
             </select>
           </div>

@@ -15,7 +15,7 @@ if ($first === "" || $last === "" || $email === "") {
   exit;
 }
 
-if ($role !== "Teacher" && $role !== "Admin") $role = "Teacher";
+if ($role !== "Teacher" && $role !== "Classroom Assistant" && $role !== "Admin") $role = "Teacher";
 
 // Temporary password policy:
 // - All new users start with the same temporary password ("Centralia")

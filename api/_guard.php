@@ -35,9 +35,12 @@ function api_require_admin(): void {
   }
 }
 
+function api_is_teacher_like_role(string $role): bool {
+  return $role === "Teacher" || $role === "Classroom Assistant";
+}
+
 function api_require_reports_access(): void {
-  $role = $_SESSION["role"] ?? "";
-  if ($role !== "Admin" && $role !== "Teacher") {
+  if (empty($_SESSION["user_id"])) {
     http_response_code(403);
     echo json_encode(["ok" => false, "error" => "Forbidden"]);
     exit;

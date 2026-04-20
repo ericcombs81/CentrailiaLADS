@@ -16,7 +16,7 @@ if ($id <= 0 || $first === "" || $last === "" || $email === "") {
   exit;
 }
 
-if ($role !== "Teacher" && $role !== "Admin") $role = "Teacher";
+if ($role !== "Teacher" && $role !== "Classroom Assistant" && $role !== "Admin") $role = "Teacher";
 
 $stmt = $conn->prepare("UPDATE users SET email=?, first=?, last=?, role=? WHERE ID=?");
 if (!$stmt) {
