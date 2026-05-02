@@ -21,6 +21,11 @@ try {
   if ($year_start < 2000 || $year_start > 2100) throw new Exception("Invalid year_start");
   if (!is_array($days)) throw new Exception("Missing days[]");
 
+  $current_year_start = current_school_year_start();
+  if ($year_start < $current_year_start - 1 || $year_start > $current_year_start + 1) {
+    throw new Exception("School year is outside the allowed range");
+  }
+
   $start = sprintf("%04d-08-01", $year_start);
   $end   = sprintf("%04d-07-31", $year_start + 1);
 
@@ -60,4 +65,11 @@ try {
     $conn->rollback();
   }
   echo json_encode(["ok" => false, "error" => $e->getMessage()]);
+}
+
+function current_school_year_start(): int {
+  $today = new DateTimeImmutable("now");
+  $year = (int)$today->format("Y");
+  $july_first = new DateTimeImmutable(sprintf("%04d-07-01", $year));
+  return $today >= $july_first ? $year : $year - 1;
 }

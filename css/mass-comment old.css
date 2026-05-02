@@ -171,15 +171,3 @@
   .mass-form, .btn-primary, .btn-secondary, .btn-edit, .btn-delete, .toast { display: none !important; }
   .mass-comment { box-shadow: none !important; margin: 0 !important; padding: 0 !important; }
 }
-/* Date-range layout */
-.form-row.two-dates {
-  grid-template-columns: 90px minmax(160px, 220px) 90px minmax(160px, 220px) 1fr;
-}
-
-@media (max-width: 720px) {
-  .form-row,
-  .form-row.two-dates,
-  .actions {
-    grid-template-columns: 1fr;
-  }
-}

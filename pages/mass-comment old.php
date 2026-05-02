@@ -13,21 +13,18 @@ security_headers_html();
   </div>
 
   <div class="mass-form">
-    <div class="form-row two-dates">
-      <label for="mcStartDate">Start Date:</label>
-      <input type="date" id="mcStartDate">
-
-      <label for="mcEndDate">End Date:</label>
-      <input type="date" id="mcEndDate">
+    <div class="form-row">
+      <label for="mcDate">Date:</label>
+      <input type="date" id="mcDate">
     </div>
 
     <div class="form-row">
       <label for="mcText">Comment:</label>
-      <textarea id="mcText" rows="3" placeholder="Type the comment to prepend to ALL active students for every date in the range..." autocorrect="on" autocapitalize="sentences" spellcheck="true"></textarea>
+      <textarea id="mcText" rows="3" placeholder="Type the comment to prepend to ALL students..." autocorrect="on" autocapitalize="sentences" spellcheck="true"></textarea>
     </div>
 
     <div class="form-row actions">
-      <button id="mcSaveBtn" class="btn-primary">Save Comment</button>
+      <button id="mcSaveBtn" class="btn-primary">Save</button>
       <div id="mcToast" class="toast"></div>
     </div>
   </div>
@@ -37,15 +34,13 @@ security_headers_html();
       <thead>
         <tr>
           <th>Comment</th>
-          <th class="center">Start Date</th>
-          <th class="center">End Date</th>
-          <th class="center">Days</th>
+          <th class="center">Date</th>
           <th class="center">Edit</th>
           <th class="center">Delete</th>
         </tr>
       </thead>
       <tbody id="mcTableBody">
-        <tr><td colspan="6">Loading...</td></tr>
+        <tr><td colspan="4">Loading...</td></tr>
       </tbody>
     </table>
   </div>
@@ -55,27 +50,23 @@ security_headers_html();
     <div class="modal-content">
       <div class="modal-head">
         <h3>Edit Mass Comment</h3>
-        <button id="mcEditClose" class="x" type="button" aria-label="Close">×</button>
+        <button id="mcEditClose" class="x">×</button>
       </div>
 
       <input type="hidden" id="mcEditId">
-
-      <div class="form-row two-dates">
-        <label for="mcEditStartDate">Start Date:</label>
-        <input type="date" id="mcEditStartDate">
-
-        <label for="mcEditEndDate">End Date:</label>
-        <input type="date" id="mcEditEndDate">
+      <div class="form-row">
+        <label>Date:</label>
+        <input type="date" id="mcEditDate" disabled>
       </div>
 
       <div class="form-row">
-        <label for="mcEditText">Comment:</label>
+        <label>Comment:</label>
         <textarea id="mcEditText" rows="4" autocorrect="on" autocapitalize="sentences" spellcheck="true"></textarea>
       </div>
 
       <div class="modal-actions">
-        <button id="mcEditSave" class="btn-primary" type="button">Save</button>
-        <button id="mcEditCancel" class="btn-secondary" type="button">Cancel</button>
+        <button id="mcEditSave" class="btn-primary">Save</button>
+        <button id="mcEditCancel" class="btn-secondary">Cancel</button>
       </div>
     </div>
   </div>

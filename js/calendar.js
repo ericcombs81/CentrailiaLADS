@@ -17,14 +17,12 @@ export async function initCalendarPage() {
 
   if (!yearSel || !grid || !btnSave) return;
 
-  // Build year options (current school year ±2)
-  const now = new Date();
-  const y = now.getFullYear();
-  // If we're before Aug, current school year started last year
-  const likelyStart = (now.getMonth() < 7) ? (y - 1) : y;
+  // Build year options for last, current, and next school year.
+  // The default school year rolls forward on July 1.
+  const likelyStart = getCurrentSchoolYearStart(new Date());
 
   yearSel.innerHTML = "";
-  for (let ys = likelyStart - 2; ys <= likelyStart + 2; ys++) {
+  for (let ys = likelyStart - 1; ys <= likelyStart + 1; ys++) {
     const opt = document.createElement("option");
     opt.value = String(ys);
     opt.textContent = `${ys}-${ys + 1}`;
@@ -46,7 +44,7 @@ export async function initCalendarPage() {
   btnSave.addEventListener("click", async () => {
     try {
       await saveChanges();
-      showToast("Saved ✓");
+      showToast("Saved");
     } catch (e) {
       console.error(e);
       alert(e.message || String(e));
@@ -196,6 +194,12 @@ export async function initCalendarPage() {
 
 function toYMD(d) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+function getCurrentSchoolYearStart(date) {
+  const year = date.getFullYear();
+  const julyFirst = new Date(year, 6, 1);
+  return date >= julyFirst ? year : year - 1;
 }
 
 async function fetchJson(url, opts) {

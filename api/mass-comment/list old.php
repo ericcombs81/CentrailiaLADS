@@ -3,31 +3,17 @@ require_once __DIR__ . "/../_guard.php";
 api_require_login();
 api_require_csrf();
 api_require_admin();
-api_require_method(["GET"]);
 require_once __DIR__ . "/../../config/db.php";
 try {
   $id = isset($_GET["id"]) ? (int)$_GET["id"] : 0;
 
-  // COALESCE keeps old rows readable if you copied PHP before running the migration.
-  $select = "
-    SELECT
-      `id`,
-      COALESCE(`start_date`, `comment_date`) AS `start_date`,
-      COALESCE(`end_date`, `comment_date`) AS `end_date`,
-      `comment_date`,
-      `comment_text`,
-      `created_at`,
-      `updated_at`
-    FROM `mass_comments`
-  ";
-
   if ($id > 0) {
-    $stmt = $conn->prepare($select . " WHERE `id`=?");
+    $stmt = $conn->prepare("SELECT `id`, `comment_date`, `comment_text` FROM `mass_comments` WHERE `id`=?");
     $stmt->bind_param("i", $id);
     $stmt->execute();
     $rows = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
   } else {
-    $res = $conn->query($select . " ORDER BY COALESCE(`start_date`, `comment_date`) DESC, `id` DESC");
+    $res = $conn->query("SELECT `id`, `comment_date`, `comment_text` FROM `mass_comments` ORDER BY `comment_date` DESC, `id` DESC");
     $rows = $res ? $res->fetch_all(MYSQLI_ASSOC) : [];
   }
 
