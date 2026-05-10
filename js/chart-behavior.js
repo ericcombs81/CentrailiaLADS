@@ -354,15 +354,42 @@ function ensurePrintStyle() {
   style.id = "chartBehaviorPrintStyle";
   style.textContent = `
     @media print {
-      body * { visibility: hidden !important; }
-      #chartBehaviorPrintArea, #chartBehaviorPrintArea * { visibility: visible !important; }
-      #chartBehaviorPrintArea { 
+      @page { size: letter landscape; margin: 0.25in; }
+
+      html, body {
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100% !important;
+        height: auto !important;
+        overflow: visible !important;
+        background: #fff !important;
+      }
+
+      body.chart-behavior-is-printing * { visibility: hidden !important; }
+      body.chart-behavior-is-printing #chartBehaviorPrintArea,
+      body.chart-behavior-is-printing #chartBehaviorPrintArea * {
+        visibility: visible !important;
+      }
+      body.chart-behavior-is-printing #chartBehaviorPrintArea { 
         position: absolute; 
         left: 0; 
         top: 0; 
         width: 100%; 
         padding: 0; 
         margin: 0; 
+      }
+
+      body.chart-behavior-is-printing #chartBehaviorPrintArea .paper {
+        width: 100% !important;
+        max-width: none !important;
+        box-sizing: border-box !important;
+        box-shadow: none !important;
+        border-radius: 0 !important;
+      }
+
+      body.chart-behavior-is-printing #chartBehaviorPrintArea .chart {
+        width: 100% !important;
+        max-height: 6.6in;
       }
     }
   `;
@@ -396,15 +423,23 @@ function printReportPreview() {
 
   area.appendChild(clone);
   area.style.display = "block";
+  document.body.classList.add("chart-behavior-is-printing");
 
   const cleanup = () => {
+    document.body.classList.remove("chart-behavior-is-printing");
     area.style.display = "none";
     window.removeEventListener("afterprint", cleanup);
   };
   window.addEventListener("afterprint", cleanup);
 
   // Give layout a tick before printing (helps in some browsers)
-  requestAnimationFrame(() => window.print());
+  requestAnimationFrame(() => {
+    try {
+      window.print();
+    } finally {
+      setTimeout(cleanup, 1000);
+    }
+  });
 }
 
 /* ---------------- PDF Export ---------------- */
@@ -418,9 +453,9 @@ async function exportReportPreviewToPdf({ studentText, behaviorText, start, end 
   const { jsPDF } = window.jspdf || {};
   if (!html2canvas || !jsPDF) throw new Error("PDF libraries failed to load.");
 
-  // Letter portrait
-  const pageW = 612;
-  const pageH = 792;
+  // Letter landscape
+  const pageW = 792;
+  const pageH = 612;
   const marginX = 36;
   const marginTop = 36;
   const marginBottom = 36;
@@ -492,7 +527,7 @@ async function exportReportPreviewToPdf({ studentText, behaviorText, start, end 
   const x = (pageW - drawW) / 2;
   const y = marginTop;
 
-  const pdf = new jsPDF({ orientation: "p", unit: "pt", format: "letter" });
+  const pdf = new jsPDF({ orientation: "l", unit: "pt", format: "letter" });
   pdf.addImage(imgData, "PNG", x, y, drawW, drawH);
 
   const filename = makeFilename("BehaviorChart", studentText, behaviorText, start, end);
@@ -537,4 +572,3 @@ function loadScriptOnce(src, globalNameHint) {
     document.head.appendChild(s);
   });
 }
-

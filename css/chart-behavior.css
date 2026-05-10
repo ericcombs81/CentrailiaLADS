@@ -121,9 +121,29 @@
 
 /* Print */
 @media print {
+  @page { size: letter landscape; margin: 0.25in; }
+
   .report-controls { display: none; }
+  .report-behavior {
+    padding: 0 !important;
+    background: #fff !important;
+  }
   .report-behavior, .paper { box-shadow: none; }
-  .paper { padding: 0; }
+  .paper {
+    border-radius: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    max-width: none !important;
+    box-sizing: border-box !important;
+  }
+  .paper-head,
+  .paper-foot {
+    font-size: 11pt;
+  }
+  .chart {
+    width: 100% !important;
+    max-height: 6.6in;
+  }
 }
 /* Make grid children allow shrinking inside the controls card */
 .report-controls .control-row > input[type="date"],

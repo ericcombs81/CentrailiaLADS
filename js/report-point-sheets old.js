@@ -32,26 +32,13 @@ export async function initReportPointSheetsPage() {
 
   btnPrint.addEventListener("click", () => {
     // Hide browser print header title as much as possible
-    // and add a print-only body class so CSS can remove the app shell
-    // instead of merely hiding it. That prevents extra blank pages on
-    // some school/printer-driver combinations.
     const prevTitle = document.title;
     document.title = "";
-    document.body.classList.add("rps-is-printing");
-
-    const cleanup = () => {
-      document.body.classList.remove("rps-is-printing");
-      document.title = prevTitle;
-      window.removeEventListener("afterprint", cleanup);
-    };
-
-    window.addEventListener("afterprint", cleanup);
-
     try {
       window.print();
     } finally {
-      // Some browsers do not reliably fire afterprint after canceling.
-      setTimeout(cleanup, 1000);
+      // Restore after print dialog closes
+      setTimeout(() => { document.title = prevTitle; }, 0);
     }
   }, { signal });
 

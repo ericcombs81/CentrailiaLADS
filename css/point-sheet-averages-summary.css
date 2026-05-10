@@ -146,9 +146,21 @@
 
 /* Print */
 @media print {
+  @page { size: letter landscape; margin: 0.25in; }
+
   .report-controls { display: none; }
+  .report-avg-summary {
+    padding: 0 !important;
+    background: #fff !important;
+  }
   .report-avg-summary, .paper { box-shadow: none; }
-  .paper { padding: 0; }
+  .paper {
+    border-radius: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    max-width: none !important;
+    box-sizing: border-box !important;
+  }
 }
 
 /* ---------------- Summary table readability upgrades ---------------- */

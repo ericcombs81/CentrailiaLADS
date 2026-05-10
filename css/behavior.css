@@ -53,7 +53,9 @@
   transform: translateY(0px);
 }
 
-.btn-edit {
+.btn-edit,
+.btn-delete,
+.btn-assigned {
   background: linear-gradient(180deg, #ffffff 0%, #f4f4f4 100%);
   color: #cc0100;
   border: 1px solid #d6d6d6;
@@ -65,16 +67,41 @@
   box-shadow: 0 2px 5px rgba(0,0,0,0.08);
 }
 
-.btn-edit:hover {
+.btn-edit:hover,
+.btn-assigned:hover {
   background: linear-gradient(180deg, #fff5f5 0%, #ffecec 100%);
   border-color: #cc0100;
   transform: translateY(-1px);
   box-shadow: 0 4px 10px rgba(0,0,0,0.12);
 }
 
-.btn-edit:active {
+.btn-delete {
+  color: #8b1a1a;
+  margin-left: 6px;
+}
+
+.btn-delete:hover:not(:disabled) {
+  background: linear-gradient(180deg, #fff5f5 0%, #ffe0e0 100%);
+  border-color: #8b1a1a;
+  transform: translateY(-1px);
+}
+
+.btn-delete:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.btn-edit:active,
+.btn-delete:active,
+.btn-assigned:active {
   transform: translateY(0px);
   box-shadow: 0 2px 5px rgba(0,0,0,0.10) inset;
+}
+
+.status-unused {
+  color: #386641;
+  font-weight: 700;
 }
 
 .center { text-align: center; }
@@ -145,6 +172,26 @@ th.sortable.desc::after { content: '▼'; opacity: 1; }
   max-width: 90vw;
   box-shadow: 0 4px 16px rgba(0,0,0,0.2);
   position: relative;
+}
+
+.modal-content-small {
+  width: 460px;
+}
+
+.assigned-list {
+  max-height: 320px;
+  overflow: auto;
+  margin-top: 12px;
+}
+
+.assigned-list ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.assigned-list li {
+  padding: 5px 0;
+  font-weight: 700;
 }
 
 .close-btn {

@@ -1,0 +1,171 @@
+.rps-page h2 {
+  margin: 0 0 10px 0;
+  color: #cc0100;
+  font-size: 22px;
+  border-bottom: 2px solid #cc0100;
+  display: inline-block;
+  padding-bottom: 4px;
+}
+
+.rps-toolbar {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 12px 14px;
+  background: #f4f4f4;
+  border-radius: 12px;
+  margin-bottom: 12px;
+}
+
+.rps-tool {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.rps-tool label { font-weight: 900; }
+
+.rps-tool input[type="date"] {
+  padding: 8px 10px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.rps-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.btn-secondary {
+  padding: 8px 14px;
+  border-radius: 10px;
+  font-weight: 900;
+  border: 1px solid #cc0100;
+  background: #fff;
+  color: #cc0100;
+  cursor: pointer;
+}
+
+.btn-secondary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.rps-count {
+  font-weight: 900;
+  color: #333;
+}
+
+/* ✅ Hide the sheets on screen */
+.rps-print-area {
+  display: none;
+}
+
+
+
+/* Signature block (print-friendly) */
+.signature-block{
+  margin-top: 36px;
+  font-size: 12px;
+}
+
+/* Right-align block and limit width */
+.signature-block.signature-right{
+  width: 50%;
+  margin-left: auto;   /* pushes it right */
+}
+
+.signature-block .sig-line{
+  display:flex;
+  align-items:flex-end;
+  gap:10px;
+  margin-top: 8px;
+}
+
+.signature-block .sig-label{
+  white-space: nowrap;
+  font-weight: 700;
+}
+
+.signature-block .sig-blank{
+  flex: 1;
+  border-bottom: 2px solid #000;
+  height: 16px;
+}
+
+@media print {
+  @page { size: letter portrait; margin: 0.4in; }
+
+  /* ✅ Hide EVERYTHING by default */
+  body * {
+    visibility: hidden !important;
+  }
+
+  /* ✅ Only show the generated print content */
+  #rpsPrintArea,
+  #rpsPrintArea * {
+    visibility: visible !important;
+  }
+
+  /* If your page sometimes uses this wrapper instead */
+  .rps-print-area,
+  .rps-print-area * {
+    visibility: visible !important;
+  }
+
+  /* ✅ Force the print area to start at the very top-left */
+  #rpsPrintArea,
+  .rps-print-area {
+    display: block !important;
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+  }
+
+  /* One sheet per page */
+  .rps-sheet {
+    page-break-after: always;
+    break-after: page;
+  }
+  .rps-sheet:last-child {
+    page-break-after: auto;
+    break-after: auto;
+  }
+
+  /* Black/white table */
+  .behavior-table th,
+  .behavior-table td {
+    background: #fff !important;
+    border: 2px solid #000 !important;
+    color: #000 !important;
+  }
+
+  /* ✅ Filled checkboxes */
+  #rpsPrintArea input[type="checkbox"],
+  .rps-print-area input[type="checkbox"] {
+    -webkit-appearance: none !important;
+    appearance: none !important;
+    width: 14px !important;
+    height: 14px !important;
+    border: 2px solid #000 !important;
+    border-radius: 2px !important;
+    background: #fff !important;
+    display: inline-block !important;
+    vertical-align: middle !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  #rpsPrintArea input[type="checkbox"]:checked,
+  .rps-print-area input[type="checkbox"]:checked {
+    background: #000 !important;
+  }
+}
+

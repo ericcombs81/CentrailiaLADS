@@ -64,36 +64,12 @@ function showToast(message, duration = 1500) {
   }, duration);
 }
 
-
-function resizeCommentsBox(el) {
-  if (!el) return;
-  el.style.height = "auto";
-  el.style.height = `${el.scrollHeight}px`;
-}
-
-function wireAutoExpandingComments() {
-  const commentsEl = document.getElementById("comments");
-  if (!commentsEl || commentsEl.dataset.autoExpandWired === "1") return;
-
-  commentsEl.dataset.autoExpandWired = "1";
-  resizeCommentsBox(commentsEl);
-
-  commentsEl.addEventListener("input", () => {
-    resizeCommentsBox(commentsEl);
-  });
-}
-
 function attachTotalsListenerOnce() {
   if (totalsListenerAttached) return;
   totalsListenerAttached = true;
 
   document.addEventListener("change", (e) => {
-    const isPointInput = e.target
-      && e.target.classList
-      && (e.target.classList.contains("period-check") || e.target.classList.contains("attendance-check"));
-    const isUnexcusedInput = e.target && e.target.id === "unexcusedAbsence";
-
-    if (isPointInput || isUnexcusedInput) {
+    if (e.target && e.target.classList && (e.target.classList.contains("period-check") || e.target.classList.contains("attendance-check"))) {
       const studentSelect = document.getElementById("student");
       const hasStudent = studentSelect && studentSelect.value !== "";
 
@@ -110,29 +86,12 @@ function attachTotalsListenerOnce() {
         return;
       }
 
-      if (isUnexcusedInput) {
-        applyUnexcusedAbsenceState(e.target.checked);
-      }
-
       recalcTotals();
     }
   });
 }
 
 function recalcTotals() {
-  if (isUnexcusedAbsenceChecked()) {
-    document.querySelectorAll("#behaviorBody td.row-total, .total-cell").forEach((cell) => {
-      cell.textContent = "0%";
-    });
-
-    const overallText = document.getElementById("overallTotal");
-    if (overallText) overallText.textContent = "0%";
-
-    const overallCell = document.getElementById("overallTotalCell");
-    if (overallCell) overallCell.textContent = "";
-    return;
-  }
-
   // Present periods logic:
   // A period counts as PRESENT if:
   //   - Any behavior checkbox in that period is checked, OR
@@ -400,7 +359,6 @@ function initStudentTypeahead() {
 export async function initStudentPage() {
   attachTotalsListenerOnce();
   wireSubmitButton();
-  wireAutoExpandingComments();
   attachPeriodHeaderToggleDelegatedOnce();
 
   // Default to today's date in Central Time
@@ -463,7 +421,6 @@ export async function initStudentPage() {
   wireAutoLoad();
   ensurePeriodHeaderPointers();
   applyAttendanceMask(0);
-  setUnexcusedAbsence(false);
   recalcTotals();
 
   // ✅ Add print wiring at the end so it never blocks student loading
@@ -477,14 +434,10 @@ async function renderBehaviorTableFor(student_id, session_date) {
   tbody.innerHTML = "";
 
   const commentsEl = document.getElementById("comments");
-  if (commentsEl) {
-    commentsEl.value = "";
-    resizeCommentsBox(commentsEl);
-  }
+  if (commentsEl) commentsEl.value = "";
 
   // Clear attendance flags for a fresh render
   applyAttendanceMask(0);
-  setUnexcusedAbsence(false);
 
   const res = await secureFetch(
     `api/student-behaviors/list.php?student_id=${encodeURIComponent(student_id)}&date=${encodeURIComponent(session_date)}&v=${Date.now()}`,
@@ -527,8 +480,6 @@ async function renderBehaviorTableFor(student_id, session_date) {
 
 
 function getPresentMaskFromAttendanceChecks() {
-  if (isUnexcusedAbsenceChecked()) return 0;
-
   // Bit 0 = period 1 ... bit 9 = period 10
   let mask = 0;
   document.querySelectorAll(".attendance-check").forEach(cb => {
@@ -550,28 +501,6 @@ function applyAttendanceMask(mask) {
   });
 }
 
-function isUnexcusedAbsenceChecked() {
-  return document.getElementById("unexcusedAbsence")?.checked === true;
-}
-
-function setUnexcusedAbsence(checked) {
-  const cb = document.getElementById("unexcusedAbsence");
-  if (cb) cb.checked = checked === true;
-  applyUnexcusedAbsenceState(checked === true);
-}
-
-function applyUnexcusedAbsenceState(isAbsent) {
-  if (isAbsent) {
-    document.querySelectorAll("#behaviorBody input.period-check, .attendance-check").forEach((cb) => {
-      cb.checked = false;
-    });
-  }
-
-  document.querySelectorAll("#behaviorBody input.period-check, .attendance-check").forEach((cb) => {
-    cb.disabled = isAbsent;
-  });
-}
-
 async function submitPointSheet() {
   const studentSel = document.getElementById("student");
   const dateEl = document.getElementById("date");
@@ -580,7 +509,6 @@ async function submitPointSheet() {
   const student_id = Number(studentSel?.value || 0);
   const session_date = dateEl?.value || "";
   const comments = commentsEl?.value || "";
-  const unexcused_absence = isUnexcusedAbsenceChecked() ? 1 : 0;
 
   if (!student_id) return alert("Select a student first.");
   if (!session_date) return alert("Pick a date first.");
@@ -595,14 +523,14 @@ async function submitPointSheet() {
 
     const behavior_id = Number(m[1]);
     const period = Number(m[2]);
-    const value = unexcused_absence ? 0 : (cb.checked ? 1 : 0);
+    const value = cb.checked ? 1 : 0;
 
     marks.push({ behavior_id, period, value });
   });
 
-  const present_mask = unexcused_absence ? 0 : getPresentMaskFromAttendanceChecks();
+    const present_mask = getPresentMaskFromAttendanceChecks();
 
-  const payload = { student_id, session_date, comments, present_mask, unexcused_absence, marks };
+  const payload = { student_id, session_date, comments, present_mask, marks };
 
   const res = await secureFetch("api/point-sheet/create.php?v=" + Date.now(), {
     method: "POST",
@@ -629,22 +557,16 @@ async function loadPointSheet(student_id, session_date) {
   if (!json.ok) throw new Error(json.error || "Load failed.");
 
   const commentsEl = document.getElementById("comments");
-  if (commentsEl) {
-    commentsEl.value = json.comments || "";
-    resizeCommentsBox(commentsEl);
-  }
+  if (commentsEl) commentsEl.value = json.comments || "";
 
   // Restore attendance ("present but no points") flags
   applyAttendanceMask(json.present_mask || 0);
-  setUnexcusedAbsence(Number(json.unexcused_absence || 0) === 1);
 
   const checks = document.querySelectorAll("#behaviorBody input.period-check");
   checks.forEach(cb => {
     const key = cb.name;
-    cb.checked = !isUnexcusedAbsenceChecked() && (json.marks && json.marks[key] === 1);
+    cb.checked = (json.marks && json.marks[key] === 1);
   });
-
-  applyUnexcusedAbsenceState(isUnexcusedAbsenceChecked());
 
   recalcTotals();
 }
@@ -842,13 +764,6 @@ async function printStudentsViaReportRenderer(studentIds) {
 
   const prevTitle = document.title;
   document.title = "";
-  document.body.classList.add("student-is-printing");
-
-  const cleanupPrintClass = () => {
-    document.body.classList.remove("student-is-printing");
-    window.removeEventListener("afterprint", cleanupPrintClass);
-  };
-  window.addEventListener("afterprint", cleanupPrintClass);
 
   try {
     const pageDateEl = document.getElementById("date");   // main page date picker
@@ -877,7 +792,6 @@ const url =
     alert(err.message);
   } finally {
     document.title = prevTitle;
-    setTimeout(cleanupPrintClass, 1000);
     setTimeout(() => { printArea.innerHTML = ""; }, 250);
   }
 }

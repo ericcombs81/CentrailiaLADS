@@ -28,18 +28,11 @@ try {
     $studentIds = array_values(array_unique($studentIds));
   }
 
-  $hasUnexcusedAbsence = false;
-  $colRes = $conn->query("SHOW COLUMNS FROM behavior_sessions LIKE 'unexcused_absence'");
-  if ($colRes && $colRes->num_rows > 0) $hasUnexcusedAbsence = true;
-  $unexcusedSelect = $hasUnexcusedAbsence ? "bs.unexcused_absence" : "0 AS unexcused_absence";
-
   // Get sessions + student name + comments
   $sqlSessions = "
     SELECT
       bs.session_id,
       bs.comments,
-      bs.present_mask,
-      {$unexcusedSelect},
       s.ID AS student_id,
       s.last,
       s.first
@@ -104,13 +97,7 @@ try {
     $count++;
     $session_id = (int)$s["session_id"];
     $studentName = htmlspecialchars($s["last"] . ", " . $s["first"]);
-    $presentMask = (int)($s["present_mask"] ?? 0);
-    $isUnexcusedAbsence = (int)($s["unexcused_absence"] ?? 0) === 1;
-    $commentsRaw = (string)($s["comments"] ?? "");
-$comments = htmlspecialchars($commentsRaw, ENT_QUOTES, "UTF-8");
-
-// Convert saved line breaks into real HTML line breaks for print
-$comments = str_replace(["\r\n", "\r", "\n"], "<br>", $comments);
+    $comments = htmlspecialchars((string)($s["comments"] ?? ""));
 
     $stmtMarks->bind_param("i", $session_id);
     if (!$stmtMarks->execute()) throw new Exception("Execute failed: " . $stmtMarks->error);
@@ -140,41 +127,23 @@ $comments = str_replace(["\r\n", "\r", "\n"], "<br>", $comments);
 
     // ---- compute totals like student.js ----
     $colTotals = array_fill(1, 10, ["checked" => 0, "total" => 0]);
-    $present = array_fill(1, 10, false);
-
-    if (!$isUnexcusedAbsence) {
-      for ($p = 1; $p <= 10; $p++) {
-        if (($presentMask & (1 << ($p - 1))) !== 0) $present[$p] = true;
-      }
-
-      foreach ($map as $periods) {
-        for ($p = 1; $p <= 10; $p++) {
-          if (!empty($periods[$p])) $present[$p] = true;
-        }
-      }
-    }
-
-    $presentPeriods = [];
-    for ($p = 1; $p <= 10; $p++) {
-      if ($present[$p]) $presentPeriods[] = $p;
-    }
-    $presentCount = count($presentPeriods);
-    $overallChecked = 0;
+    $allChecked = 0;
+    $allTotal = 0;
 
     foreach ($behaviors as $bid => $_) {
-      foreach ($presentPeriods as $p) {
+      for ($p = 1; $p <= 10; $p++) {
         $colTotals[$p]["total"]++;
+        $allTotal++;
 
         $isChecked = !empty($map[$bid][$p]) ? 1 : 0;
         if ($isChecked) {
           $colTotals[$p]["checked"]++;
-          $overallChecked++;
+          $allChecked++;
         }
       }
     }
 
-    $overallPossible = count($behaviors) * $presentCount;
-    $overallPct = $overallPossible ? round(($overallChecked / $overallPossible) * 100) : 0;
+    $overallPct = $allTotal ? round(($allChecked / $allTotal) * 100) : 0;
 
     // ---- Render one sheet using student.php structure/classes ----
     $out .= "<div class='rps-sheet' data-student-id='" . (int)$s["student_id"] . "'>";
@@ -187,9 +156,6 @@ $comments = str_replace(["\r\n", "\r", "\n"], "<br>", $comments);
     $out .= "<div style='text-align:right;font-size:12px;line-height:1.35;'>";
     $out .= "<div><strong>Student:</strong> {$studentName}</div>";
     $out .= "<div><strong>Date:</strong> " . htmlspecialchars($printDate) . "</div>";
-    if ($isUnexcusedAbsence) {
-      $out .= "<div><strong>Attendance:</strong> Unexcused Absence</div>";
-    }
     $out .= "</div></div>";
 
     // Table
@@ -211,9 +177,11 @@ $comments = str_replace(["\r\n", "\r", "\n"], "<br>", $comments);
       $out .= "<td>" . htmlspecialchars($btxt) . "</td>";
 
       $rowChecked = 0;
+      $rowTotal = 0;
 
       for ($p = 1; $p <= 10; $p++) {
-        $checkedAttr = (!$isUnexcusedAbsence && !empty($map[$bid][$p])) ? "checked" : "";
+        $rowTotal++;
+        $checkedAttr = !empty($map[$bid][$p]) ? "checked" : "";
         if ($checkedAttr) $rowChecked++;
 
         $out .= "<td style='text-align:center;'>";
@@ -221,7 +189,7 @@ $comments = str_replace(["\r\n", "\r", "\n"], "<br>", $comments);
         $out .= "</td>";
       }
 
-      $rowPct = $presentCount ? round(($rowChecked / $presentCount) * 100) : 0;
+      $rowPct = $rowTotal ? round(($rowChecked / $rowTotal) * 100) : 0;
       $out .= "<td class='row-total' style='text-align:center;font-weight:800;'>" . $rowPct . "%</td>";
       $out .= "</tr>";
     }
@@ -231,11 +199,6 @@ $comments = str_replace(["\r\n", "\r", "\n"], "<br>", $comments);
     $out .= "<tfoot><tr class='totals-row'>";
     $out .= "<td class='totals-label'><strong>Total %</strong></td>";
     for ($p = 1; $p <= 10; $p++) {
-      if (!$isUnexcusedAbsence && !$present[$p]) {
-        $out .= "<td class='total-cell' style='text-align:center;font-weight:800;'>&mdash;</td>";
-        continue;
-      }
-
       $pct = $colTotals[$p]["total"] ? round(($colTotals[$p]["checked"] / $colTotals[$p]["total"]) * 100) : 0;
       $out .= "<td class='total-cell' style='text-align:center;font-weight:800;'>" . $pct . "%</td>";
     }
@@ -250,10 +213,10 @@ $comments = str_replace(["\r\n", "\r", "\n"], "<br>", $comments);
     $out .= "<strong>Total Percentage:</strong> <span>" . $overallPct . "%</span>";
     $out .= "</div>";
 
-    // Comments (auto-expanding; can flow onto a second printed page)
+    // Comments (taller)
     $out .= "<div class='form-comments'>";
     $out .= "<label><strong>Comments:</strong></label>";
-    $out .= "<div class='comments-print-box'>" . $comments . "</div>";
+    $out .= "<textarea rows='11' readonly>" . $comments . "</textarea>";
     $out .= "</div>";
 
     // ✅ Parent signature block (OUTSIDE the table so it can’t break layout)

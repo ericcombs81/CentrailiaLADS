@@ -60,11 +60,7 @@ export async function initPointSheetAveragesPage() {
 
   btnPrint?.addEventListener("click", async () => {
     try {
-      await exportReportPreviewToPdf({
-        studentText: selectedText(studentSel),
-        start: startDate.value,
-        end: endDate.value
-      });
+      printReportPreview();
     } catch (err) {
       console.error(err);
       alert(err.message || String(err));
@@ -273,6 +269,44 @@ function text(x, y, str, color, anchor = "start") {
 
 /* ---------------- PDF Export (same approach as chart-behavior) ---------------- */
 
+function ensurePsaPrintArea() {
+  let area = document.getElementById("psaPrintArea");
+  if (!area) {
+    area = document.createElement("div");
+    area.id = "psaPrintArea";
+    area.setAttribute("aria-label", "Point Sheet Averages Print Area");
+    area.style.display = "none";
+    document.body.appendChild(area);
+  }
+  return area;
+}
+
+function printReportPreview() {
+  const preview = document.querySelector('section.report-preview[aria-label="Report Preview"]');
+  if (!preview) throw new Error("Could not find report preview section to print.");
+
+  const area = ensurePsaPrintArea();
+  area.innerHTML = "";
+  area.appendChild(preview.cloneNode(true));
+  area.style.display = "block";
+
+  document.body.classList.add("psa-is-printing");
+
+  const cleanup = () => {
+    document.body.classList.remove("psa-is-printing");
+    area.style.display = "none";
+    area.innerHTML = "";
+    window.removeEventListener("afterprint", cleanup);
+  };
+  window.addEventListener("afterprint", cleanup);
+
+  try {
+    window.print();
+  } finally {
+    setTimeout(cleanup, 1000);
+  }
+}
+
 async function exportReportPreviewToPdf({ studentText, start, end }) {
   const preview = document.querySelector('section.report-preview[aria-label="Report Preview"]');
   if (!preview) throw new Error("Could not find report preview section.");
@@ -282,8 +316,8 @@ async function exportReportPreviewToPdf({ studentText, start, end }) {
   const { jsPDF } = window.jspdf || {};
   if (!html2canvas || !jsPDF) throw new Error("PDF libraries failed to load.");
 
-  const pageW = 612;
-  const pageH = 792;
+  const pageW = 792;
+  const pageH = 612;
   const marginX = 36;
   const marginTop = 36;
   const marginBottom = 36;
@@ -346,7 +380,7 @@ async function exportReportPreviewToPdf({ studentText, start, end }) {
   const x = (pageW - drawW) / 2;
   const y = marginTop;
 
-  const pdf = new jsPDF({ orientation: "p", unit: "pt", format: "letter" });
+  const pdf = new jsPDF({ orientation: "l", unit: "pt", format: "letter" });
   pdf.addImage(imgData, "PNG", x, y, drawW, drawH);
 
   const filename = makeFilename("PointSheetAverages", studentText, start, end);

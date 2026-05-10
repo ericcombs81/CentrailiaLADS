@@ -168,8 +168,39 @@
 }
 
 @media print {
+  @page { size: letter landscape; margin: 0.25in; }
+
   .mass-form, .btn-primary, .btn-secondary, .btn-edit, .btn-delete, .toast { display: none !important; }
-  .mass-comment { box-shadow: none !important; margin: 0 !important; padding: 0 !important; }
+  html,
+  body {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    height: auto !important;
+    overflow: visible !important;
+    background: #fff !important;
+  }
+  .mass-comment {
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    max-width: none !important;
+    width: 100% !important;
+  }
+  .table-wrap {
+    border-radius: 0 !important;
+    overflow: visible !important;
+  }
+  .mc-table {
+    table-layout: fixed;
+  }
+  .mc-table th,
+  .mc-table td {
+    padding: 6px 8px !important;
+    font-size: 10.5pt !important;
+    overflow-wrap: anywhere;
+  }
 }
 /* Date-range layout */
 .form-row.two-dates {

@@ -19,7 +19,8 @@ require_once "../config/db.php";
         <tr>
   <th class="sortable" data-key="behavior_text">Behavior</th>
   <th class="center">Default</th>
-  <th class="center">Edit</th>
+  <th class="center">Assigned</th>
+  <th class="center">Actions</th>
 </tr>
 
       </thead>
@@ -72,6 +73,15 @@ require_once "../config/db.php";
 
         <button type="submit" class="btn-submit">Save Changes</button>
       </form>
+    </div>
+  </div>
+
+  <!-- Assigned Students Modal -->
+  <div class="modal" id="assignedBehaviorModal">
+    <div class="modal-content modal-content-small">
+      <span class="close-btn" id="assignedBehaviorCloseBtn">&times;</span>
+      <h3 id="assignedBehaviorTitle">Assigned Students</h3>
+      <div id="assignedBehaviorList" class="assigned-list"></div>
     </div>
   </div>
 </div>

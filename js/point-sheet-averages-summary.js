@@ -234,21 +234,41 @@ function ensureAvgSummaryPrintStyle() {
   style.id = "avgSummaryPrintStyle";
   style.textContent = `
 @media print {
-  @page { size: letter portrait; margin: 0.4in; }
+  @page { size: letter landscape; margin: 0.25in; }
 
   /* Print ONLY what we inject into #avgSummaryPrintArea */
-  body * { visibility: hidden !important; }
+  html,
+  body {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    height: auto !important;
+    overflow: visible !important;
+    background: #fff !important;
+  }
 
-  #avgSummaryPrintArea,
-  #avgSummaryPrintArea * {
+  body.avg-summary-is-printing * { visibility: hidden !important; }
+
+  body.avg-summary-is-printing #avgSummaryPrintArea,
+  body.avg-summary-is-printing #avgSummaryPrintArea * {
     visibility: visible !important;
   }
 
-  #avgSummaryPrintArea {
+  body.avg-summary-is-printing #avgSummaryPrintArea {
     display: block !important;
     position: absolute !important;
     inset: 0 !important;
     padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+  }
+
+  body.avg-summary-is-printing #avgSummaryPrintArea .paper {
+    width: 100% !important;
+    max-width: none !important;
+    box-sizing: border-box !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
   }
 }
 `;
@@ -273,6 +293,13 @@ async function printAvgSummaryPreview({ studentText, start, end }) {
 
   document.title = titleBits.join(" - ");
 
+  const cleanup = () => {
+    document.body.classList.remove("avg-summary-is-printing");
+    printArea.innerHTML = "";
+    window.removeEventListener("afterprint", cleanup);
+  };
+  window.addEventListener("afterprint", cleanup);
+
   try {
     // Clone current paper (already reflects selected student/range + injected rows)
     const clone = paper.cloneNode(true);
@@ -282,12 +309,11 @@ async function printAvgSummaryPreview({ studentText, start, end }) {
 
     printArea.innerHTML = "";
     printArea.appendChild(clone);
+    document.body.classList.add("avg-summary-is-printing");
 
     window.print();
   } finally {
     document.title = prevTitle;
-    // give the print dialog a moment before clearing
-    setTimeout(() => { printArea.innerHTML = ""; }, 250);
+    setTimeout(cleanup, 1000);
   }
 }
-

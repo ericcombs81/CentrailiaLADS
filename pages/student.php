@@ -36,6 +36,11 @@ require_once "../config/db.php";
         </div>
       </div>
 
+      <label class="absence-toggle" for="unexcusedAbsence">
+        <input type="checkbox" id="unexcusedAbsence" name="unexcused_absence">
+        <span>Unexcused Absence</span>
+      </label>
+
       <!-- ✅ Right-aligned actions -->
       <div class="student-actions">
         <button class="btn-secondary" id="printDailyPoints" type="button">Print</button>

@@ -47,30 +47,6 @@
   justify-content: flex-end;
 }
 
-.absence-toggle {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  min-height: 38px;
-  padding: 0 10px;
-  border: 1px solid #d6dbe6;
-  border-radius: 6px;
-  background: #fff;
-  font-weight: 700;
-  white-space: nowrap;
-}
-
-.absence-toggle input {
-  width: 16px;
-  height: 16px;
-}
-
-.period-check:disabled,
-.attendance-check:disabled {
-  cursor: not-allowed;
-  opacity: 0.45;
-}
-
 .btn-submit {
   background: #cc0100;
   color: white;
@@ -192,25 +168,11 @@
   width: 100%;
   resize: vertical;
   min-height: 80px;
-  overflow: hidden;
   padding: 10px;
   border-radius: 8px;
   border: 1px solid #ccc;
   font-size: 1rem;
   font-family: inherit;
-}
-
-.form-comments .comments-print-box {
-  width: 100%;
-  min-height: 80px;
-  padding: 10px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-  font-size: 1rem;
-  font-family: inherit;
-  white-space: pre-wrap;
-  overflow-wrap: anywhere;
-  background: #fff;
 }
 
 /* ---- Print Area (hidden on screen) ---- */
@@ -436,71 +398,17 @@
    Updated: FILLED checkboxes, no clipped checkmarks, still 1 page
    ============================================================ */
 @media print {
-  @page { size: letter landscape; margin: 0.25in; }
+  @page { size: letter portrait; margin: 0.4in; }
 
-  html, body {
-    margin: 0 !important;
-    padding: 0 !important;
-    width: 100% !important;
-    height: auto !important;
-    overflow: visible !important;
-    background: #fff !important;
-  }
+  /* show only the print area you generate */
+  body * { visibility: hidden !important; }
 
-  /*
-    The JS-added body class removes the screen UI from print layout instead of
-    just hiding it. That prevents some printer drivers from adding a blank page
-    for the still-present app layout.
-  */
-  body.student-is-printing > .header-top,
-  body.student-is-printing > .header-main,
-  body.student-is-printing > .nav-bar,
-  body.student-is-printing > .logout-btn {
-    display: none !important;
-  }
-
-  body.student-is-printing main,
-  body.student-is-printing #content,
-  body.student-is-printing #pointForm,
-  body.student-is-printing #studentPrintArea {
-    display: block !important;
-    position: static !important;
-    visibility: visible !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    width: 100% !important;
-    max-width: none !important;
-    height: auto !important;
-    min-height: 0 !important;
-    overflow: visible !important;
-    background: #fff !important;
-    box-sizing: border-box !important;
-  }
-
-  body.student-is-printing #pointForm > :not(#studentPrintArea) {
-    display: none !important;
-  }
-
-  body.student-is-printing #studentPrintArea .rps-sheet {
-    display: block !important;
-    width: 100% !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    break-after: auto;
-    page-break-after: auto;
-  }
-
-  body.student-is-printing #studentPrintArea .rps-sheet:not(:last-child) {
-    break-after: page;
-    page-break-after: always;
-  }
-
-  body.student-is-printing #studentPrintArea,
-  body.student-is-printing #studentPrintArea * {
+  #studentPrintArea,
+  #studentPrintArea * {
     visibility: visible !important;
   }
 
-  body.student-is-printing #studentPrintArea {
+  #studentPrintArea {
     display: block !important;
     position: absolute !important;
     inset: 0 !important;
@@ -584,23 +492,14 @@
     background: #000 !important;
   }
 
-  /* comments: allow long comments to expand naturally, even onto page 2 */
-  .form-comments textarea,
-  .form-comments .comments-print-box {
-    height: auto !important;
+  /* comments: keep it readable but not so huge it forces scaling */
+  .form-comments textarea {
+    height: 150px !important;
     min-height: 150px !important;
-    max-height: none !important;
-    overflow: visible !important;
     font-size: 12px !important;
-    line-height: 1.35 !important;
     border: 2px solid #000 !important;
     padding: 8px !important;
     background: #fff !important;
-    white-space: pre-wrap !important;
-    overflow-wrap: anywhere !important;
-    box-sizing: border-box !important;
-    break-inside: auto !important;
-    page-break-inside: auto !important;
   }
 
   /* signature: keep clean */
@@ -615,7 +514,7 @@
   }
 
   /* ✅ print: black text, no shadows (BUT don't nuke backgrounds globally) */
-  body.student-is-printing * {
+  * {
     color: #000 !important;
     text-shadow: none !important;
     box-shadow: none !important;

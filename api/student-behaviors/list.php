@@ -45,6 +45,7 @@ $sql2 = "
   SELECT behavior_id, behavior_text
   FROM behaviors
   WHERE is_default = 1
+    AND is_active = 1
   ORDER BY behavior_id ASC
 ";
 $res2 = $conn->query($sql2);

@@ -114,8 +114,62 @@
 
 /* Print */
 @media print {
-  body * { visibility: hidden; }
-  .report-preview, .report-preview * { visibility: visible; }
-  .report-preview { position: absolute; left: 0; top: 0; width: 100%; }
-  .report-psa .paper { box-shadow: none; border-radius: 0; }
+  @page { size: letter landscape; margin: 0.15in; }
+
+  html,
+  body {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    height: auto !important;
+    overflow: visible !important;
+    background: #fff !important;
+  }
+
+  body.psa-is-printing > :not(#psaPrintArea) {
+    display: none !important;
+  }
+
+  body.psa-is-printing #psaPrintArea,
+  body.psa-is-printing #psaPrintArea * {
+    visibility: visible !important;
+  }
+  body.psa-is-printing #psaPrintArea {
+    display: block !important;
+    position: static !important;
+    width: 100%;
+    margin: 0 !important;
+    padding: 0 !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+  body.psa-is-printing #psaPrintArea .report-preview {
+    display: block !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  body.psa-is-printing #psaPrintArea .paper {
+    box-shadow: none;
+    border-radius: 0;
+    padding: 0 !important;
+    width: 100% !important;
+    max-width: none !important;
+    height: auto !important;
+    min-height: 0 !important;
+    box-sizing: border-box !important;
+  }
+  body.psa-is-printing #psaPrintArea .paper-head {
+    margin-bottom: 4px !important;
+  }
+  body.psa-is-printing #psaPrintArea .chart-wrap {
+    padding-top: 2px !important;
+  }
+  body.psa-is-printing #psaPrintArea .chart {
+    height: 5.35in !important;
+    max-height: 5.35in !important;
+  }
+  body.psa-is-printing #psaPrintArea .paper-foot {
+    margin-top: 2px !important;
+  }
 }

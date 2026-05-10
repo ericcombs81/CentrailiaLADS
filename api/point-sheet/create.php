@@ -16,6 +16,7 @@ $student_id   = (int)($input["student_id"] ?? 0);
 $session_date = trim($input["session_date"] ?? "");
 $comments     = $input["comments"] ?? "";
 $present_mask = (int)($input["present_mask"] ?? 0);
+$unexcused_absence = !empty($input["unexcused_absence"]) ? 1 : 0;
 $marks        = $input["marks"] ?? [];
 
 if ($student_id <= 0 || $session_date === "") {
@@ -28,6 +29,18 @@ if (!is_array($marks)) $marks = [];
 
 // Clamp to 10 bits (periods 1..10)
 $present_mask = $present_mask & 1023;
+if ($unexcused_absence) $present_mask = 0;
+
+function behavior_sessions_has_unexcused_absence(mysqli $conn): bool {
+  static $hasColumn = null;
+  if ($hasColumn !== null) return $hasColumn;
+
+  $res = $conn->query("SHOW COLUMNS FROM behavior_sessions LIKE 'unexcused_absence'");
+  $hasColumn = $res && $res->num_rows > 0;
+  return $hasColumn;
+}
+
+$hasUnexcusedAbsence = behavior_sessions_has_unexcused_absence($conn);
 
 $conn->begin_transaction();
 
@@ -44,16 +57,32 @@ try {
   $stmt->close();
 
   if ($session_id === null) {
-    $stmt = $conn->prepare("INSERT INTO behavior_sessions (student_id, session_date, comments, present_mask) VALUES (?, ?, ?, ?)");
+    if ($hasUnexcusedAbsence) {
+      $stmt = $conn->prepare("INSERT INTO behavior_sessions (student_id, session_date, comments, present_mask, unexcused_absence) VALUES (?, ?, ?, ?, ?)");
+    } else {
+      $stmt = $conn->prepare("INSERT INTO behavior_sessions (student_id, session_date, comments, present_mask) VALUES (?, ?, ?, ?)");
+    }
     if (!$stmt) throw new Exception($conn->error);
-    $stmt->bind_param("issi", $student_id, $session_date, $comments, $present_mask);
+    if ($hasUnexcusedAbsence) {
+      $stmt->bind_param("issii", $student_id, $session_date, $comments, $present_mask, $unexcused_absence);
+    } else {
+      $stmt->bind_param("issi", $student_id, $session_date, $comments, $present_mask);
+    }
     if (!$stmt->execute()) throw new Exception($stmt->error);
     $session_id = (int)$conn->insert_id;
     $stmt->close();
   } else {
-    $stmt = $conn->prepare("UPDATE behavior_sessions SET comments=?, present_mask=? WHERE session_id=?");
+    if ($hasUnexcusedAbsence) {
+      $stmt = $conn->prepare("UPDATE behavior_sessions SET comments=?, present_mask=?, unexcused_absence=? WHERE session_id=?");
+    } else {
+      $stmt = $conn->prepare("UPDATE behavior_sessions SET comments=?, present_mask=? WHERE session_id=?");
+    }
     if (!$stmt) throw new Exception($conn->error);
-    $stmt->bind_param("sii", $comments, $present_mask, $session_id);
+    if ($hasUnexcusedAbsence) {
+      $stmt->bind_param("siii", $comments, $present_mask, $unexcused_absence, $session_id);
+    } else {
+      $stmt->bind_param("sii", $comments, $present_mask, $session_id);
+    }
     if (!$stmt->execute()) throw new Exception($stmt->error);
     $stmt->close();
   }
@@ -74,7 +103,7 @@ try {
 
     if ($behavior_id <= 0) continue;
     if ($period < 1 || $period > 10) continue;
-    $value = ($value === 1) ? 1 : 0;
+    $value = (!$unexcused_absence && $value === 1) ? 1 : 0;
 
     $stmt->bind_param("iiii", $session_id, $behavior_id, $period, $value);
     if (!$stmt->execute()) throw new Exception($stmt->error);
