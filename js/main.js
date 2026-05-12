@@ -5,7 +5,81 @@ import { initCsrf } from './security.js';
 const v = Date.now(); // dev cache-bust
 
 document.addEventListener("DOMContentLoaded", () => {
-  const links = document.querySelectorAll(".nav-bar a");
+  const pageLinks = document.querySelectorAll(".nav-bar a[data-page]");
+  const helpVideoLinks = document.querySelectorAll(".nav-bar a[data-help-video]");
+
+  function closeHelpVideo() {
+    const overlay = document.getElementById("helpVideoOverlay");
+    if (!overlay) return;
+
+    const video = overlay.querySelector("video");
+    if (video) {
+      video.pause();
+      video.removeAttribute("src");
+      video.load();
+    }
+
+    overlay.classList.remove("open");
+    overlay.setAttribute("aria-hidden", "true");
+    document.body.classList.remove("help-video-open");
+
+    if (document.fullscreenElement === overlay) {
+      const exitFullscreen = document.exitFullscreen?.();
+      if (exitFullscreen && typeof exitFullscreen.catch === "function") {
+        exitFullscreen.catch(() => {});
+      }
+    }
+  }
+
+  function ensureHelpVideoOverlay() {
+    let overlay = document.getElementById("helpVideoOverlay");
+    if (overlay) return overlay;
+
+    overlay = document.createElement("div");
+    overlay.id = "helpVideoOverlay";
+    overlay.className = "help-video-overlay";
+    overlay.setAttribute("aria-hidden", "true");
+    overlay.innerHTML = `
+      <button type="button" class="help-video-close" aria-label="Close tutorial video">Close</button>
+      <video controls playsinline></video>
+    `;
+    document.body.appendChild(overlay);
+
+    overlay.querySelector(".help-video-close")?.addEventListener("click", closeHelpVideo);
+    document.addEventListener("fullscreenchange", () => {
+      if (overlay.classList.contains("open") && !document.fullscreenElement) {
+        closeHelpVideo();
+      }
+    });
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && overlay.classList.contains("open")) {
+        closeHelpVideo();
+      }
+    });
+
+    return overlay;
+  }
+
+  function openHelpVideo(src) {
+    const overlay = ensureHelpVideoOverlay();
+    const video = overlay.querySelector("video");
+    if (!video) return;
+
+    video.src = src;
+    overlay.classList.add("open");
+    overlay.setAttribute("aria-hidden", "false");
+    document.body.classList.add("help-video-open");
+
+    const fullscreen = overlay.requestFullscreen?.();
+    if (fullscreen && typeof fullscreen.catch === "function") {
+      fullscreen.catch(() => {});
+    }
+
+    const playback = video.play?.();
+    if (playback && typeof playback.catch === "function") {
+      playback.catch(() => {});
+    }
+  }
 
   async function loadPage(page) {
     const content = document.getElementById("content");
@@ -83,11 +157,18 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  links.forEach(link => {
+  pageLinks.forEach(link => {
     link.addEventListener("click", e => {
       e.preventDefault();
       const page = link.getAttribute("data-page");
       loadPage(page);
+    });
+  });
+
+  helpVideoLinks.forEach(link => {
+    link.addEventListener("click", e => {
+      e.preventDefault();
+      openHelpVideo(link.getAttribute("data-help-video") || link.href);
     });
   });
 
@@ -97,4 +178,3 @@ document.addEventListener("DOMContentLoaded", () => {
   // Load default page
   loadPage("student");
 });
-

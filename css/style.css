@@ -297,6 +297,51 @@ main {
   opacity: 1;
 }
 
+.help-video-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 100000;
+  align-items: center;
+  justify-content: center;
+  background: #000;
+}
+
+.help-video-overlay.open {
+  display: flex;
+}
+
+.help-video-overlay video {
+  width: 100vw;
+  height: 100vh;
+  background: #000;
+  object-fit: contain;
+}
+
+.help-video-close {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 100001;
+  border: 1px solid rgba(255,255,255,0.45);
+  border-radius: 6px;
+  background: rgba(0,0,0,0.7);
+  color: #fff;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.95rem;
+  font-weight: 700;
+  padding: 8px 12px;
+}
+
+.help-video-close:hover {
+  background: rgba(204,1,0,0.95);
+}
+
+body.help-video-open {
+  overflow: hidden;
+}
+
 
 
 

@@ -12,7 +12,7 @@ $role = $u["role"] ?? "";
 <head>
 <meta charset="UTF-8">
 <title>LADS App</title>
-<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/style.css?v=<?php echo filemtime(__DIR__ . '/css/style.css'); ?>">
 <link rel="stylesheet" href="css/chart-behavior.css">
 <link rel="stylesheet" href="css/point-sheet-averages.css">
 <link rel="stylesheet" href="css/calendar.css">
@@ -63,8 +63,17 @@ $role = $u["role"] ?? "";
       <ul class="dropdown">
         <li><a href="#" data-page="report-point-sheets">Daily Point Sheets</a></li>
         <li><a href="#" data-page="point-sheet-averages">Point Sheet Averages</a></li>
-        <li><a href="#" data-page="point-sheet-averages-summary">Point Sheet Averages (All Behaviors)</a><li>
+        <li><a href="#" data-page="point-sheet-averages-summary">Point Sheet Averages (All Behaviors)</a></li>
         <li><a href="#" data-page="chart-behavior">Point Sheet Chart by Behavior</a></li>
+      </ul>
+    </li>
+
+    <!-- HELP Dropdown (visible to all users) -->
+    <li class="has-dropdown">
+      <span class="nav-label">HELP &#9662;</span>
+      <ul class="dropdown">
+        <li><a href="AppTeacherDemo.mp4" data-help-video="AppTeacherDemo.mp4">Tutorial Video for Teachers</a></li>
+        <li><a href="AppAdminDemo.mp4" data-help-video="AppAdminDemo.mp4">Tutorial Video for Admin</a></li>
       </ul>
     </li>
 

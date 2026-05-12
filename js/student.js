@@ -83,14 +83,38 @@ function wireAutoExpandingComments() {
   });
 }
 
+function getPeriodFromBehaviorCheck(cb) {
+  const match = String(cb?.name || "").match(/_p(\d+)$/);
+  return match ? Number(match[1]) : 0;
+}
+
+function getAttendanceCheckForPeriod(period) {
+  const p = Number(period || 0);
+  if (p < 1 || p > 10) return null;
+  return document.querySelector(`.attendance-check[data-period="${p}"]`);
+}
+
+function clearBehaviorChecksForPeriod(period) {
+  const p = Number(period || 0);
+  if (p < 1 || p > 10) return;
+
+  document.querySelectorAll(`#behaviorBody input.period-check[name$="_p${p}"]`).forEach((cb) => {
+    cb.checked = false;
+  });
+}
+
 function attachTotalsListenerOnce() {
   if (totalsListenerAttached) return;
   totalsListenerAttached = true;
 
   document.addEventListener("change", (e) => {
-    const isPointInput = e.target
+    const isBehaviorInput = e.target
       && e.target.classList
-      && (e.target.classList.contains("period-check") || e.target.classList.contains("attendance-check"));
+      && e.target.classList.contains("period-check");
+    const isAttendanceInput = e.target
+      && e.target.classList
+      && e.target.classList.contains("attendance-check");
+    const isPointInput = isBehaviorInput || isAttendanceInput;
     const isUnexcusedInput = e.target && e.target.id === "unexcusedAbsence";
 
     if (isPointInput || isUnexcusedInput) {
@@ -112,6 +136,15 @@ function attachTotalsListenerOnce() {
 
       if (isUnexcusedInput) {
         applyUnexcusedAbsenceState(e.target.checked);
+      }
+
+      if (isAttendanceInput && e.target.checked) {
+        clearBehaviorChecksForPeriod(e.target.dataset.period);
+      }
+
+      if (isBehaviorInput && e.target.checked) {
+        const attendanceCheck = getAttendanceCheckForPeriod(getPeriodFromBehaviorCheck(e.target));
+        if (attendanceCheck) attendanceCheck.checked = false;
       }
 
       recalcTotals();
@@ -641,7 +674,8 @@ async function loadPointSheet(student_id, session_date) {
   const checks = document.querySelectorAll("#behaviorBody input.period-check");
   checks.forEach(cb => {
     const key = cb.name;
-    cb.checked = !isUnexcusedAbsenceChecked() && (json.marks && json.marks[key] === 1);
+    cb.checked = !isUnexcusedAbsenceChecked()
+      && (json.exists === false || (json.marks && json.marks[key] === 1));
   });
 
   applyUnexcusedAbsenceState(isUnexcusedAbsenceChecked());
@@ -713,6 +747,11 @@ function attachPeriodHeaderToggleDelegatedOnce() {
     boxes.forEach((b) => {
       b.checked = newState;
     });
+
+    if (newState) {
+      const attendanceCheck = getAttendanceCheckForPeriod(period);
+      if (attendanceCheck) attendanceCheck.checked = false;
+    }
 
     recalcTotals();
   });
